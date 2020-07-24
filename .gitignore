@@ -33,6 +33,7 @@
 
 # Custom
 *.swp
+/.vscode/*
 /plug-ins/*
 /scripts/*.pyc
 /source/filianore-maya/build/*
