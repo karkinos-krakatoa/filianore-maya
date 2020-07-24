@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+
+# Custom
+*.swp
+/plug-ins/*
+/scripts/*.pyc
+/source/filianore-maya/build/*
+/source/filianore-maya/.vscode/*
