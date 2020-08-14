@@ -26,6 +26,7 @@ set (CMAKE_MODULE_PATH
 # Find external Pkgs
 #---------------------------------------------------------------------------
 
+find_package(OpenMP QUIET)
 find_package (filianore REQUIRED)
 if(filianore_FOUND)
   message("Filianore Lib found.")
@@ -42,14 +43,16 @@ include($ENV{DEVKIT_LOCATION}/cmake/pluginEntry.cmake)
 
 set(SOURCE_FILES 
   src/filianoremaya/util.cpp
+  src/filianoremaya/renderglobalsnode.cpp
+  src/filianoremaya/finalrendercommand.cpp
   src/filianoremaya/pluginmain.cpp)
 
-set(LIBRARIES OpenMaya Foundation)
+set(LIBRARIES 
+     OpenMayaRender
+     OpenMayaUI
+     OpenMaya
+     Foundation)
 
 build_plugin()
 
 target_link_libraries (filianoremaya filianore)
-
-
-# file(COPY ${CMAKE_BUILD_DIRECTORY}/filianoremaya.bundle
-#      DESTINATION /Users/edem/Documents/dev/filianore-maya/plug-ins)
