@@ -9,6 +9,8 @@
 #include <maya/MSyntax.h>
 
 #include "finalrendercommand.h"
+#include "renderglobalsnode.h"
+#include "util.h"
 
 MString FinalRenderCommand::commandName("filianoreRendererRenderProcedure");
 
@@ -49,29 +51,23 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
         return MS::kFailure;
     }
 
-    MGlobal::displayInfo("FilianoreMaya : Final Render started.");
+    const RenderContext &context = RenderGlobalsNode::fetchContext();
 
-    int num_side_tiles = 16;
-    int average_tiles_width = renderSettings.width / num_side_tiles;
-    int average_tiles_height = renderSettings.height / num_side_tiles;
+    FILIANORE_MAYA_LOG_INFO("FilianoreMaya : Final Render started.");
 
-    int resDimens = renderSettings.width * renderSettings.height;
-    RV_PIXEL *pixels = new RV_PIXEL[resDimens];
+    RV_PIXEL *pixels = new RV_PIXEL[renderSettings.width * renderSettings.height];
 
+#pragma omp parallel for
     for (unsigned int y = 0; y < renderSettings.height; y++)
     {
         for (unsigned int x = 0; x < renderSettings.width; x++)
         {
             int pixelIndex = (renderSettings.height - y - 1) * renderSettings.width + x;
 
-            RV_PIXEL pixel;
-
-            pixel.r = 255.f * 0.3f;
-            pixel.g = 255.f * 0.f;
-            pixel.b = 255.f * 0.f;
-            pixel.a = 255.f;
-
-            pixels[pixelIndex] = pixel;
+            pixels[pixelIndex].r = 255.f;
+            pixels[pixelIndex].g = 255.f;
+            pixels[pixelIndex].b = 255.f;
+            pixels[pixelIndex].a = 255.f;
         }
     }
 
@@ -86,7 +82,7 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
         return MS::kFailure;
     }
 
-    MGlobal::displayInfo("FilianoreMaya : Final Render completed.");
+    FILIANORE_MAYA_LOG_INFO("FilianoreMaya : Final Render completed.");
 
     return status;
 }

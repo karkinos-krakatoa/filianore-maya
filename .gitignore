@@ -33,6 +33,7 @@
 
 # Custom
 *.swp
+*.DS_Store
 /.vscode/*
 /plug-ins/*
 /scripts/*.pyc
