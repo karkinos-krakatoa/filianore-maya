@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _RENDER_GLOBALS_NODE_H
+#define _RENDER_GLOBALS_NODE_H
 
 #include <maya/MPxNode.h>
 
@@ -25,3 +26,5 @@ private:
 
     static MObject samples;
 };
+
+#endif

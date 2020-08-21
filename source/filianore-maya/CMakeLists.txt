@@ -2,14 +2,12 @@
 # Cmake config
 #---------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.14)
 
 
 #---------------------------------------------------------------------------
 # Project Config
 #---------------------------------------------------------------------------
-
-set(CMAKE_CXX_STANDARD 17)
 
 if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     message (FATAL_ERROR "In-source builds are not permitted; run CMake inside an empty build directory.")
@@ -29,9 +27,9 @@ set (CMAKE_MODULE_PATH
 find_package(OpenMP QUIET)
 find_package (filianore REQUIRED)
 if(filianore_FOUND)
-  message("Filianore Lib found.")
+  message("Filianore Foundation Lib found.")
 else()
-  message(FATAL_ERROR "Filianore Lib not found.")
+  message(FATAL_ERROR "Filianore Foundation Lib not found.")
 endif()
 
 include($ENV{DEVKIT_LOCATION}/cmake/pluginEntry.cmake)
@@ -43,6 +41,8 @@ include($ENV{DEVKIT_LOCATION}/cmake/pluginEntry.cmake)
 
 set(SOURCE_FILES 
   src/filianoremaya/util.cpp
+  src/filianoremaya/cameraexporter.cpp
+  src/filianoremaya/meshexporter.cpp
   src/filianoremaya/renderglobalsnode.cpp
   src/filianoremaya/finalrendercommand.cpp
   src/filianoremaya/pluginmain.cpp)
@@ -52,6 +52,8 @@ set(LIBRARIES
      OpenMayaUI
      OpenMaya
      Foundation)
+
+set(CMAKE_CXX_STANDARD 17)
 
 build_plugin()
 

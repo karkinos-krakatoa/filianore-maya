@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _FINAL_RENDER_COMMAND_H
+#define _FINAL_RENDER_COMMAND_H
 
 #include <maya/MPxCommand.h>
 
@@ -12,3 +13,5 @@ public:
 
     MStatus doIt(const MArgList &args) override;
 };
+
+#endif

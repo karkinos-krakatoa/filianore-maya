@@ -14,15 +14,17 @@ MStatus initializePlugin(MObject plugin)
 	// Rendering Nodes
 	status = fnPlugin.registerNode(RenderGlobalsNode::name,
 								   RenderGlobalsNode::id, RenderGlobalsNode::creator, RenderGlobalsNode::initialize);
-	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "FilianoreMaya : Error registering RenderGlobalNode.");
+	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Error registering RenderGlobalNode.");
 
 	// Commands
 	status = fnPlugin.registerCommand(FinalRenderCommand::commandName, FinalRenderCommand::creator);
-	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "FilianoreMaya : Error registering Final Render command.");
+	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Error registering Final Render command.");
 
 	// Scripts
 	status = MGlobal::executePythonCommand("import register; register.register()", false, false);
-	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "FilianoreMaya : Error initializing rendering engine.");
+	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Error initializing rendering engine.");
+
+	FILIANORE_MAYA_LOG_INFO("Renderer Plugin registered successfully.");
 
 	return status;
 }
@@ -35,15 +37,17 @@ MStatus uninitializePlugin(MObject plugin)
 	// Rendering Nodes
 	RenderGlobalsNode::clean();
 	status = fnPlugin.deregisterNode(RenderGlobalsNode::id);
-	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "FilianoreMaya : Error deregistering RenderGlobalNode.");
+	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Error deregistering RenderGlobalNode.");
 
 	// Commands
 	status = fnPlugin.deregisterCommand(FinalRenderCommand::commandName);
-	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "FilianoreMaya : Error deregistering Final Render command.");
+	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Error deregistering Final Render command.");
 
 	// Scripts
 	status = MGlobal::executePythonCommand("import register; register.unregister()", false, false);
-	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "FilianoreMaya : Error uninitializing rendering engine.");
+	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Error uninitializing rendering engine.");
+
+	FILIANORE_MAYA_LOG_INFO("Renderer Plugin deregistered successfully.");
 
 	return status;
 }

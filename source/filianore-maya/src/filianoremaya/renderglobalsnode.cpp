@@ -27,7 +27,7 @@ MStatus RenderGlobalsNode::initialize()
     MFnNumericAttribute numAttr;
 
     samples = numAttr.create("samples", "samples", MFnNumericData::kInt, 8, &status);
-    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "FilianoreMaya : Failed to add [Samples] Attribute.");
+    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to add [Samples] Attribute.");
     numAttr.setMin(1);
     numAttr.setMax(1024);
     addAttribute(samples);
@@ -51,7 +51,7 @@ const RenderContext &RenderGlobalsNode::fetchContext()
 
     MPlug mSamplesPlug(mObj, samples);
     status = mSamplesPlug.getValue(context.samples);
-    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "FilianoreMaya : Failed to read [Samples] Attribute value.");
+    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Samples] Attribute value.");
 
     return (context);
 }
