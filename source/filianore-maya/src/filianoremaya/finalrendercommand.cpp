@@ -8,10 +8,8 @@
 #include <maya/MSelectionList.h>
 #include <maya/MSyntax.h>
 
-#include "filianore/bvh/bvh_utils.h"
 #include "filianore/bvh/bvh_prog_binned_sah.h"
-#include "filianore/core/primitive.h"
-#include "filianore/core/interaction.h"
+#include "filianore/bvh/primitive_intersectors.h"
 
 #include "cameraexporter.h"
 #include "meshexporter.h"
@@ -96,10 +94,15 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
     }
 
     // Acceleration Structure setup
+    filianore::Bvh bvh;
+    filianore::BinnedSahBuilder<16> builder(bvh);
+
     auto [bboxes, centers] = filianore::ComputeBoundingBoxesAndCenters(scenePrimitives, scenePrimitives.size());
     auto encompassed_box = filianore::ComputeEncompassingBoundingbox(bboxes, scenePrimitives.size());
 
-    filianore::Bvh bvh;
+    builder.Build(encompassed_box, &bboxes[0], &centers[0], scenePrimitives.size());
+
+    filianore::ClosestPrimitiveIntersector<false> primitiveIntersector(bvh, scenePrimitives);
 
     // Main Render Loop
     FILIANORE_MAYA_LOG_INFO("Final Render started...");
