@@ -8,8 +8,11 @@
 #include <maya/MSelectionList.h>
 #include <maya/MSyntax.h>
 
-#include "filianore/bvh/bvh_prog_binned_sah.h"
-#include "filianore/bvh/primitive_intersectors.h"
+#include <tbb/parallel_for.h>
+#include <tbb/task_scheduler_init.h>
+
+#include "filianore/bvhx/bvhx.h"
+#include "filianore/core/interaction.h"
 
 #include "cameraexporter.h"
 #include "meshexporter.h"
@@ -93,51 +96,47 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
         std::cerr << e.what() << '\n';
     }
 
-    // Acceleration Structure setup
-    filianore::Bvh bvh;
-    filianore::BinnedSahBuilder<16> builder(bvh);
-
-    auto [bboxes, centers] = filianore::ComputeBoundingBoxesAndCenters(scenePrimitives, scenePrimitives.size());
-    auto encompassed_box = filianore::ComputeEncompassingBoundingbox(bboxes, scenePrimitives.size());
-
-    builder.Build(encompassed_box, &bboxes[0], &centers[0], scenePrimitives.size());
-
-    filianore::ClosestPrimitiveIntersector<false> primitiveIntersector(bvh, scenePrimitives);
+    // Accel Setup
+    filianore::BVH bvhx(scenePrimitives);
 
     // Main Render Loop
     FILIANORE_MAYA_LOG_INFO("Final Render started...");
     RV_PIXEL *pixels = new RV_PIXEL[renderSettings.width * renderSettings.height];
 
-#pragma omp parallel for
-    for (unsigned int y = 0; y < renderSettings.height; y++)
-    {
-        for (unsigned int x = 0; x < renderSettings.width; x++)
-        {
-            int pixelIndex = (renderSettings.height - y - 1) * renderSettings.width + x;
+    tbb::task_scheduler_init init(11);
 
-            float u = (static_cast<float>(x) + 0.125f) / float(renderSettings.width);
-            float v = (static_cast<float>(y) + 0.8775f) / float(renderSettings.height);
+    tbb::parallel_for(tbb::blocked_range<int>(0, renderSettings.height),
+                      [renderSettings, &camera, &bvhx, pixels](const tbb::blocked_range<int> &range) {
+                          for (unsigned int y = range.begin(); y != (unsigned int)range.end(); y++)
+                          {
+                              for (unsigned int x = 0; x < renderSettings.width; x++)
+                              {
+                                  int pixelIndex = (renderSettings.height - y - 1) * renderSettings.width + x;
 
-            filianore::Ray ray = camera->AwakenRay(filianore::StaticArray<float, 2>(u, v), filianore::StaticArray<float, 2>(0.332f, 0.55012f));
+                                  float u = (static_cast<float>(x) + 0.125f) / float(renderSettings.width);
+                                  float v = (static_cast<float>(y) + 0.8775f) / float(renderSettings.height);
 
-            filianore::StaticArray<float, 3> currPixel;
+                                  filianore::Ray ray = camera->AwakenRay(filianore::StaticArray<float, 2>(u, v), filianore::StaticArray<float, 2>(0.332f, 0.55012f));
 
-            filianore::SurfaceInteraction isect;
-            if (scenePrimitives[0]->Intersect(ray, &isect))
-            {
-                currPixel = filianore::StaticArray<float, 3>(isect.n.x(), isect.n.y(), isect.n.z());
-            }
-            else
-            {
-                currPixel = filianore::StaticArray<float, 3>(0.f, 0.f, 0.f);
-            }
+                                  filianore::StaticArray<float, 3> currPixel;
 
-            pixels[pixelIndex].r = 255.f * currPixel.x();
-            pixels[pixelIndex].g = 255.f * currPixel.y();
-            pixels[pixelIndex].b = 255.f * currPixel.z();
-            pixels[pixelIndex].a = 255.f;
-        }
-    }
+                                  filianore::SurfaceInteraction isect;
+                                  if (bvhx.Intersect(ray, &isect))
+                                  {
+                                      currPixel = filianore::StaticArray<float, 3>(isect.n.x(), isect.n.y(), isect.n.z());
+                                  }
+                                  else
+                                  {
+                                      currPixel = filianore::StaticArray<float, 3>(0.f, 0.f, 0.f);
+                                  }
+
+                                  pixels[pixelIndex].r = 255.f * filianore::Clamp<float>(currPixel.x(), 0.f, 1.f);
+                                  pixels[pixelIndex].g = 255.f * filianore::Clamp<float>(currPixel.y(), 0.f, 1.f);
+                                  pixels[pixelIndex].b = 255.f * filianore::Clamp<float>(currPixel.z(), 0.f, 1.f);
+                                  pixels[pixelIndex].a = 255.f;
+                              }
+                          }
+                      });
 
     MRenderView::updatePixels(0, renderSettings.width - 1, 0, renderSettings.height - 1, pixels);
     MRenderView::refresh(0, renderSettings.width - 1, 0, renderSettings.height - 1);
