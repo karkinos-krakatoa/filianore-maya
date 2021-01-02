@@ -49,6 +49,7 @@ include($ENV{DEVKIT_LOCATION}/cmake/pluginEntry.cmake)
 
 set(SOURCE_FILES 
   src/filianoremaya/util.cpp
+  src/filianoremaya/dagUtils.cpp
   src/filianoremaya/cameraexporter.cpp
   src/filianoremaya/meshexporter.cpp
   src/filianoremaya/illuminantsexporter.cpp

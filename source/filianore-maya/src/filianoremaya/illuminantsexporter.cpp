@@ -5,30 +5,36 @@
 #include <maya/MMatrix.h>
 #include <maya/MPointArray.h>
 #include <maya/MGlobal.h>
+#include <maya/MFnLight.h>
+#include <maya/MFnPointLight.h>
 
 #include "illuminantsexporter.h"
 #include "util.h"
 
-#include "filianore/core/illuminant.h"
+#include "filianore/illuminants/point.h"
 
 std::vector<std::shared_ptr<filianore::Illuminant>> IlluminantExporter::ExportIlluminants()
 {
     std::vector<std::shared_ptr<filianore::Illuminant>> illums;
 
-    int lightCount = 0;
-
-    for (MItDag it; !it.isDone(); it.next())
+    MStatus status;
+    MItDag dagIt(MItDag::kBreadthFirst, MFn::kLight, &status);
+    for (; !dagIt.isDone(); dagIt.next())
     {
-        MObject obj = it.currentItem();
-        if (obj.apiType() == MFn::kLight)
+        MDagPath dagPath;
+        status = dagIt.getPath(dagPath);
+        if (!status)
         {
-            lightCount++;
+            status.perror("MItDag::getPath");
+            continue;
+        }
+
+        if (dagPath.hasFn(MFn::kPointLight))
+        {
+            MFnPointLight pointIllum;
+            //pointIllum
         }
     }
-
-    auto ss = std::to_string(lightCount);
-    MString primCount = ss.c_str();
-    FILIANORE_MAYA_LOG_INFO("Light Count - " + primCount);
 
     return illums;
 }
