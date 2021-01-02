@@ -82,7 +82,7 @@ MayaMesh::MayaMesh(MFnMesh &_mesh)
             TriEntity t3(triV3, triN3, true);
 
             std::shared_ptr<filianore::Shape> triangle = std::make_shared<filianore::Triangle>(t1, t2, t3);
-            std::shared_ptr<filianore::Primitive> primitive = std::make_shared<filianore::GeometricPrimitive>(triangle);
+            std::shared_ptr<filianore::Primitive> primitive = std::make_shared<filianore::GeometricPrimitive>(triangle, nullptr);
 
             primitives.emplace_back(primitive);
         }

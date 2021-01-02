@@ -51,6 +51,7 @@ set(SOURCE_FILES
   src/filianoremaya/util.cpp
   src/filianoremaya/cameraexporter.cpp
   src/filianoremaya/meshexporter.cpp
+  src/filianoremaya/illuminantsexporter.cpp
   src/filianoremaya/renderglobalsnode.cpp
   src/filianoremaya/finalrendercommand.cpp
   src/filianoremaya/pluginmain.cpp)

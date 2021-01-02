@@ -6,9 +6,9 @@
 #include <maya/MGlobal.h>
 #include <maya/MStatus.h>
 
-constexpr auto FILIANORE_MAYA_NAME = "FilianoreForMaya";
+constexpr auto FILIANORE_MAYA_NAME = "FilianoreMaya";
 
-constexpr auto FILIANORE_MAYA_NAME_FOR_LOGGING = "FilianoreForMaya : ";
+constexpr auto FILIANORE_MAYA_NAME_FOR_LOGGING = "FilianoreMaya : ";
 
 constexpr auto FILIANORE_MAYA_VERSION = "1.0";
 

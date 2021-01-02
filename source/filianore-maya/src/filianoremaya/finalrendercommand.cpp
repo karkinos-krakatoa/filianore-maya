@@ -16,6 +16,7 @@
 
 #include "cameraexporter.h"
 #include "meshexporter.h"
+#include "illuminantsexporter.h"
 
 #include "finalrendercommand.h"
 #include "renderglobalsnode.h"
@@ -93,6 +94,19 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
     catch (const std::exception &e)
     {
         FILIANORE_MAYA_LOG_ERROR("Error in getting/initializing the Scene Primitives.");
+        std::cerr << e.what() << '\n';
+    }
+
+    // Illum setup
+    IlluminantExporter illumExporter;
+    std::vector<std::shared_ptr<filianore::Illuminant>> illums;
+    try
+    {
+        illums = illumExporter.ExportIlluminants();
+    }
+    catch (const std::exception &e)
+    {
+        FILIANORE_MAYA_LOG_ERROR("Error in getting/initializing the Scene Illuminants.");
         std::cerr << e.what() << '\n';
     }
 
