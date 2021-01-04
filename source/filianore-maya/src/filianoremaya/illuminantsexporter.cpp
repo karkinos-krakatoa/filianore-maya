@@ -1,3 +1,5 @@
+#include <memory>
+
 #include <maya/MItDag.h>
 #include <maya/MDagPath.h>
 #include <maya/MFloatVectorArray.h>
@@ -7,15 +9,19 @@
 #include <maya/MGlobal.h>
 #include <maya/MFnLight.h>
 #include <maya/MFnPointLight.h>
+#include <maya/MColor.h>
 
 #include "illuminantsexporter.h"
 #include "util.h"
+#include "dagUtils.h"
 
 #include "filianore/illuminants/point.h"
 
-std::vector<std::shared_ptr<filianore::Illuminant>> IlluminantExporter::ExportIlluminants()
+using namespace filianore;
+
+std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants()
 {
-    std::vector<std::shared_ptr<filianore::Illuminant>> illums;
+    std::vector<std::shared_ptr<Illuminant>> illums;
 
     MStatus status;
     MItDag dagIt(MItDag::kBreadthFirst, MFn::kLight, &status);
@@ -31,8 +37,19 @@ std::vector<std::shared_ptr<filianore::Illuminant>> IlluminantExporter::ExportIl
 
         if (dagPath.hasFn(MFn::kPointLight))
         {
-            MFnPointLight pointIllum;
-            //pointIllum
+            MFnPointLight pointIllum(dagPath, &status);
+            if (!status)
+            {
+                status.perror("MFnLight constructor");
+                continue;
+            }
+
+            TransformVectors transformData = GetDagObjectTransformData(dagPath);
+            StaticArray<float, 3> color = StaticArray<float, 3>(pointIllum.color().r, pointIllum.color().g, pointIllum.color().b);
+            float weight = pointIllum.intensity();
+
+            std::shared_ptr<Illuminant> actualPointIllum = std::make_shared<PointIlluminant>(transformData.Translate, color, weight);
+            illums.emplace_back(actualPointIllum);
         }
     }
 

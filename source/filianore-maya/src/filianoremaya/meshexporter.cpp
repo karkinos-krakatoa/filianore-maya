@@ -11,10 +11,15 @@
 #include "filianore/shapes/triangle.h"
 #include "filianore/core/primitive.h"
 
+#include "filianore/textures/constant.h"
+#include "filianore/materials/lambert.h"
+
 #include <map>
 
-using Vec3 = filianore::StaticArray<float, 3>;
-using TriEntity = filianore::TriangleEntity;
+using namespace filianore;
+
+using Vec3 = StaticArray<float, 3>;
+using TriEntity = TriangleEntity;
 
 MayaMesh::MayaMesh(MFnMesh &_mesh)
     : name(_mesh.name().asChar())
@@ -81,17 +86,21 @@ MayaMesh::MayaMesh(MFnMesh &_mesh)
             TriEntity t2(triV2, triN2, true);
             TriEntity t3(triV3, triN3, true);
 
-            std::shared_ptr<filianore::Shape> triangle = std::make_shared<filianore::Triangle>(t1, t2, t3);
-            std::shared_ptr<filianore::Primitive> primitive = std::make_shared<filianore::GeometricPrimitive>(triangle, nullptr);
+            std::shared_ptr<Shape> triangle = std::make_shared<Triangle>(t1, t2, t3);
+
+            std::shared_ptr<Texture<Color>> tex = std::make_shared<ConstantTexture<Color>>(Color(1.f));
+            std::shared_ptr<Material> material = std::make_shared<LambertMaterial>(tex);
+
+            std::shared_ptr<Primitive> primitive = std::make_shared<GeometricPrimitive>(triangle, material);
 
             primitives.emplace_back(primitive);
         }
     }
 }
 
-std::vector<std::shared_ptr<filianore::Primitive>> MeshExporter::ExportPrimitives()
+std::vector<std::shared_ptr<Primitive>> MeshExporter::ExportPrimitives()
 {
-    std::vector<std::shared_ptr<filianore::Primitive>> prims;
+    std::vector<std::shared_ptr<Primitive>> prims;
     prims.resize(0);
 
     for (MItDag it; !it.isDone(); it.next())
@@ -102,7 +111,7 @@ std::vector<std::shared_ptr<filianore::Primitive>> MeshExporter::ExportPrimitive
             MFnMesh mesh(obj);
             MayaMesh mMesh(mesh);
 
-            std::vector<std::shared_ptr<filianore::Primitive>> primitivesFromMesh = mMesh.primitives;
+            std::vector<std::shared_ptr<Primitive>> primitivesFromMesh = mMesh.primitives;
 
             prims.insert(prims.end(), primitivesFromMesh.begin(), primitivesFromMesh.end());
         }

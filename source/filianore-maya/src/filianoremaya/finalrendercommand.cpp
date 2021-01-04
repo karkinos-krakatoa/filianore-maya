@@ -13,6 +13,9 @@
 
 #include "filianore/accel/bvh.h"
 #include "filianore/core/interaction.h"
+#include "filianore/core/scene.h"
+#include "filianore/samplers/whitenoise.h"
+#include "filianore/integrators/path_integrator.h"
 
 #include "cameraexporter.h"
 #include "meshexporter.h"
@@ -115,7 +118,12 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
     }
 
     // Accel Setup
-    filianore::BVH bvhx(scenePrimitives);
+    std::shared_ptr<filianore::Primitive> bvh = std::make_shared<filianore::BVH>(scenePrimitives);
+
+    // Render components setup
+    filianore::Scene scene(bvh, illums);
+    std::shared_ptr<filianore::Sampler> sampler = std::make_shared<filianore::Whitenoise>();
+    std::unique_ptr<filianore::Integrator> integrator = std::make_unique<filianore::PathIntegrator>(1, sampler);
 
     // Main Render Loop
     FILIANORE_MAYA_LOG_INFO("Final Render started...");
@@ -124,35 +132,40 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
     tbb::task_scheduler_init init(11);
 
     tbb::parallel_for(tbb::blocked_range<int>(0, renderSettings.height),
-                      [renderSettings, &camera, &bvhx, pixels](const tbb::blocked_range<int> &range) {
+                      [renderSettings, &camera, &scene, &sampler, &integrator, pixels](const tbb::blocked_range<int> &range) {
                           for (unsigned int y = range.begin(); y != (unsigned int)range.end(); y++)
                           {
                               for (unsigned int x = 0; x < renderSettings.width; x++)
                               {
                                   int pixelIndex = (renderSettings.height - y - 1) * renderSettings.width + x;
 
-                                  float u = (static_cast<float>(x) + 0.125f) / float(renderSettings.width);
-                                  float v = (static_cast<float>(y) + 0.8775f) / float(renderSettings.height);
+                                  filianore::StaticArray<float, 2> uRand = sampler->Get2D();
+                                  float u = (static_cast<float>(x) + uRand.x()) / float(renderSettings.width);
+                                  float v = (static_cast<float>(y) + uRand.y()) / float(renderSettings.height);
 
                                   filianore::Ray ray = camera->AwakenRay(filianore::StaticArray<float, 2>(u, v), filianore::StaticArray<float, 2>(0.332f, 0.55012f));
 
                                   filianore::StaticArray<float, 3> currPixel;
 
                                   filianore::SurfaceInteraction isect;
-                                  if (bvhx.Intersect(ray, &isect))
-                                  {
-                                      currPixel = filianore::StaticArray<float, 3>(isect.n.x(), isect.n.y(), isect.n.z());
-                                      pixels[pixelIndex].a = 255.f;
-                                  }
-                                  else
-                                  {
-                                      currPixel = filianore::StaticArray<float, 3>(0.f, 0.f, 0.f);
-                                      pixels[pixelIndex].a = 0.f;
-                                  }
+
+                                  currPixel = integrator->Li(ray, scene, *sampler, 0);
+
+                                  //   if (scene.Intersect(ray, &isect))
+                                  //   {
+                                  //       currPixel = filianore::StaticArray<float, 3>(isect.n.x(), isect.n.y(), isect.n.z());
+                                  //       pixels[pixelIndex].a = 255.f;
+                                  //   }
+                                  //   else
+                                  //   {
+                                  //       currPixel = filianore::StaticArray<float, 3>(0.f, 0.f, 0.f);
+                                  //       pixels[pixelIndex].a = 0.f;
+                                  //   }
 
                                   pixels[pixelIndex].r = 255.f * filianore::Clamp<float>(currPixel.x(), 0.f, 1.f);
                                   pixels[pixelIndex].g = 255.f * filianore::Clamp<float>(currPixel.y(), 0.f, 1.f);
                                   pixels[pixelIndex].b = 255.f * filianore::Clamp<float>(currPixel.z(), 0.f, 1.f);
+                                  pixels[pixelIndex].a = 255.f;
                               }
                           }
                       });
