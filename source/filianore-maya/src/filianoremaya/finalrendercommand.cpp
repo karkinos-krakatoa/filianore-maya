@@ -145,22 +145,7 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
 
                                   filianore::Ray ray = camera->AwakenRay(filianore::StaticArray<float, 2>(u, v), filianore::StaticArray<float, 2>(0.332f, 0.55012f));
 
-                                  filianore::StaticArray<float, 3> currPixel;
-
-                                  filianore::SurfaceInteraction isect;
-
-                                  currPixel = integrator->Li(ray, scene, *sampler, 0);
-
-                                  //   if (scene.Intersect(ray, &isect))
-                                  //   {
-                                  //       currPixel = filianore::StaticArray<float, 3>(isect.n.x(), isect.n.y(), isect.n.z());
-                                  //       pixels[pixelIndex].a = 255.f;
-                                  //   }
-                                  //   else
-                                  //   {
-                                  //       currPixel = filianore::StaticArray<float, 3>(0.f, 0.f, 0.f);
-                                  //       pixels[pixelIndex].a = 0.f;
-                                  //   }
+                                  filianore::StaticArray<float, 3> currPixel = integrator->Li(ray, scene, *sampler, 0);
 
                                   pixels[pixelIndex].r = 255.f * filianore::Clamp<float>(currPixel.x(), 0.f, 1.f);
                                   pixels[pixelIndex].g = 255.f * filianore::Clamp<float>(currPixel.y(), 0.f, 1.f);

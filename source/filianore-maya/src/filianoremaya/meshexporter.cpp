@@ -6,6 +6,7 @@
 #include <maya/MPointArray.h>
 #include <maya/MGlobal.h>
 
+#include "util.h"
 #include "meshexporter.h"
 
 #include "filianore/shapes/triangle.h"
