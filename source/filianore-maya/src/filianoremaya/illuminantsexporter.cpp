@@ -15,6 +15,8 @@
 #include "util.h"
 #include "dagUtils.h"
 
+#include "filianore/color/rgb.h"
+
 #include "filianore/illuminants/point.h"
 
 using namespace filianore;
@@ -45,7 +47,7 @@ std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants()
             }
 
             TransformVectors transformData = GetDagObjectTransformData(dagPath);
-            StaticArray<float, 3> color = StaticArray<float, 3>(pointIllum.color().r, pointIllum.color().g, pointIllum.color().b);
+            RGBSpectrum color = RGBSpectrum(pointIllum.color().r, pointIllum.color().g, pointIllum.color().b);
             float weight = pointIllum.intensity();
 
             std::shared_ptr<Illuminant> actualPointIllum = std::make_shared<PointIlluminant>(transformData.Translate, color, weight);

@@ -36,6 +36,7 @@
 *.DS_Store
 /.vscode/*
 /plug-ins/*
+/icons/*
 /presets/*
 /scripts/*.pyc
 /source/filianore-maya/build/*

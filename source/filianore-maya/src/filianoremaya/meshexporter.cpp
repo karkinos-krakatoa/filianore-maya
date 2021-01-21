@@ -9,6 +9,8 @@
 #include "util.h"
 #include "meshexporter.h"
 
+#include "filianore/color/rgb.h"
+
 #include "filianore/shapes/triangle.h"
 #include "filianore/core/primitive.h"
 
@@ -89,7 +91,8 @@ MayaMesh::MayaMesh(MFnMesh &_mesh)
 
             std::shared_ptr<Shape> triangle = std::make_shared<Triangle>(t1, t2, t3);
 
-            std::shared_ptr<Texture<Color>> tex = std::make_shared<ConstantTexture<Color>>(Color(1.f));
+            RGBSpectrum col(0.380f);
+            std::shared_ptr<Texture<RGBSpectrum>> tex = std::make_shared<ConstantTexture<RGBSpectrum>>(col);
             std::shared_ptr<Material> material = std::make_shared<LambertMaterial>(tex);
 
             std::shared_ptr<Primitive> primitive = std::make_shared<GeometricPrimitive>(triangle, material);

@@ -28,6 +28,6 @@ std::unique_ptr<filianore::Camera> CameraExporter::ExportCamera()
     return std::make_unique<filianore::PhysicalCamera>(Vec3((float)mOrigin.x, (float)mOrigin.y, (float)mOrigin.z),
                                                        Vec3((float)mLookAt.x, (float)mLookAt.y, (float)mLookAt.z),
                                                        xRes, yRes,
-                                                       (float)vFov * 57.29578f, 0.f, 0.f, 1.f,
+                                                       (float)vFov * 45.f, 0.f, 0.f, 1.f,
                                                        Vec3(0.f, -1.f, 0.f), true);
 }

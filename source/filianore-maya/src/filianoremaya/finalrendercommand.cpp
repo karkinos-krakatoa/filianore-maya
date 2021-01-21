@@ -11,11 +11,12 @@
 #include <tbb/parallel_for.h>
 #include <tbb/task_scheduler_init.h>
 
+#include "filianore/color/rgb.h"
 #include "filianore/accel/bvh.h"
 #include "filianore/core/interaction.h"
 #include "filianore/core/scene.h"
 #include "filianore/samplers/whitenoise.h"
-#include "filianore/integrators/path_integrator.h"
+#include "filianore/integrators/pathintegrator.h"
 
 #include "cameraexporter.h"
 #include "meshexporter.h"
@@ -24,6 +25,8 @@
 #include "finalrendercommand.h"
 #include "renderglobalsnode.h"
 #include "util.h"
+
+using namespace filianore;
 
 MString FinalRenderCommand::commandName("filianoreRendererRenderProcedure");
 
@@ -66,7 +69,7 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
 
     // Camera setup
     CameraExporter cameraExporter;
-    std::unique_ptr<filianore::Camera> camera;
+    std::unique_ptr<Camera> camera;
     try
     {
         cameraExporter = CameraExporter(renderSettings.width, renderSettings.height);
@@ -80,7 +83,7 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
 
     // Illum setup
     IlluminantExporter illumExporter;
-    std::vector<std::shared_ptr<filianore::Illuminant>> illums;
+    std::vector<std::shared_ptr<Illuminant>> illums;
     try
     {
         illums = illumExporter.ExportIlluminants();
@@ -97,7 +100,7 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
 
     // Meshes setup
     MeshExporter meshExporter;
-    std::vector<std::shared_ptr<filianore::Primitive>> scenePrimitives;
+    std::vector<std::shared_ptr<Primitive>> scenePrimitives;
     try
     {
         scenePrimitives = meshExporter.ExportPrimitives();
@@ -118,12 +121,13 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
     }
 
     // Accel Setup
-    std::shared_ptr<filianore::Primitive> bvh = std::make_shared<filianore::BVH>(scenePrimitives);
+    std::shared_ptr<Primitive> bvh = std::make_shared<BVH>(scenePrimitives);
 
     // Render components setup
-    filianore::Scene scene(bvh, illums);
-    std::shared_ptr<filianore::Sampler> sampler = std::make_shared<filianore::Whitenoise>();
-    std::unique_ptr<filianore::Integrator> integrator = std::make_unique<filianore::PathIntegrator>(1, sampler);
+    Scene scene(bvh, illums);
+    std::shared_ptr<Sampler> sampler = std::make_shared<Whitenoise>();
+    std::unique_ptr<Integrator> integrator = std::make_unique<PathIntegrator>(1);
+    integrator->PrepareTheRenderer(scene, *sampler);
 
     // Main Render Loop
     FILIANORE_MAYA_LOG_INFO("Final Render started...");
@@ -132,24 +136,25 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
     tbb::task_scheduler_init init(11);
 
     tbb::parallel_for(tbb::blocked_range<int>(0, renderSettings.height),
-                      [renderSettings, &camera, &scene, &sampler, &integrator, pixels](const tbb::blocked_range<int> &range) {
+                      [renderSettings, &bvh, &camera, &scene, &sampler, &integrator, pixels](const tbb::blocked_range<int> &range) {
                           for (unsigned int y = range.begin(); y != (unsigned int)range.end(); y++)
                           {
                               for (unsigned int x = 0; x < renderSettings.width; x++)
                               {
                                   int pixelIndex = (renderSettings.height - y - 1) * renderSettings.width + x;
 
-                                  filianore::StaticArray<float, 2> uRand = sampler->Get2D();
+                                  StaticArray<float, 2> uRand = sampler->Get2D();
                                   float u = (static_cast<float>(x) + uRand.x()) / float(renderSettings.width);
                                   float v = (static_cast<float>(y) + uRand.y()) / float(renderSettings.height);
 
-                                  filianore::Ray ray = camera->AwakenRay(filianore::StaticArray<float, 2>(u, v), filianore::StaticArray<float, 2>(0.332f, 0.55012f));
+                                  Ray ray = camera->AwakenRay(StaticArray<float, 2>(u, v), StaticArray<float, 2>(0.332f, 0.55012f));
 
-                                  filianore::StaticArray<float, 3> currPixel = integrator->Li(ray, scene, *sampler, 0);
+                                  RGBSpectrum currPixel(0.f);
+                                  currPixel = integrator->Li(ray, scene, *sampler, 0);
 
-                                  pixels[pixelIndex].r = 255.f * filianore::Clamp<float>(currPixel.x(), 0.f, 1.f);
-                                  pixels[pixelIndex].g = 255.f * filianore::Clamp<float>(currPixel.y(), 0.f, 1.f);
-                                  pixels[pixelIndex].b = 255.f * filianore::Clamp<float>(currPixel.z(), 0.f, 1.f);
+                                  pixels[pixelIndex].r = 255.f * Clamp<float>(currPixel.r, 0.f, 1.f);
+                                  pixels[pixelIndex].g = 255.f * Clamp<float>(currPixel.g, 0.f, 1.f);
+                                  pixels[pixelIndex].b = 255.f * Clamp<float>(currPixel.b, 0.f, 1.f);
                                   pixels[pixelIndex].a = 255.f;
                               }
                           }
