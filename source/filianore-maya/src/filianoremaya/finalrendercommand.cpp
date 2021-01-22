@@ -135,33 +135,39 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
 
     tbb::task_scheduler_init init(11);
 
-    tbb::parallel_for(tbb::blocked_range<int>(0, renderSettings.height),
-                      [renderSettings, &bvh, &camera, &scene, &sampler, &integrator, pixels](const tbb::blocked_range<int> &range) {
-                          for (unsigned int y = range.begin(); y != (unsigned int)range.end(); y++)
-                          {
-                              for (unsigned int x = 0; x < renderSettings.width; x++)
+    for (float s = 0; s < 64; s++)
+    {
+        tbb::parallel_for(tbb::blocked_range<int>(0, renderSettings.height),
+                          [renderSettings, &s, &camera, &scene, &sampler, &integrator, pixels](const tbb::blocked_range<int> &range) {
+                              for (unsigned int y = range.begin(); y != (unsigned int)range.end(); y++)
                               {
-                                  int pixelIndex = (renderSettings.height - y - 1) * renderSettings.width + x;
+                                  for (unsigned int x = 0; x < renderSettings.width; x++)
+                                  {
+                                      int pixelIndex = (renderSettings.height - y - 1) * renderSettings.width + x;
 
-                                  StaticArray<float, 2> uRand = sampler->Get2D();
-                                  float u = (static_cast<float>(x) + uRand.x()) / float(renderSettings.width);
-                                  float v = (static_cast<float>(y) + uRand.y()) / float(renderSettings.height);
+                                      StaticArray<float, 2> uRand = sampler->Get2D();
+                                      float u = (static_cast<float>(x) + uRand.x()) / float(renderSettings.width);
+                                      float v = (static_cast<float>(y) + uRand.y()) / float(renderSettings.height);
 
-                                  Ray ray = camera->AwakenRay(StaticArray<float, 2>(u, v), StaticArray<float, 2>(0.332f, 0.55012f));
+                                      Ray ray = camera->AwakenRay(StaticArray<float, 2>(u, v), StaticArray<float, 2>(0.332f, 0.55012f));
 
-                                  RGBSpectrum currPixel(0.f);
-                                  currPixel = integrator->Li(ray, scene, *sampler, 0);
+                                      RGBSpectrum currPixel(0.f);
+                                      currPixel = integrator->Li(ray, scene, *sampler, 0);
+                                      //currPixel = GammaCorrect(currPixel);
 
-                                  pixels[pixelIndex].r = 255.f * Clamp<float>(currPixel.r, 0.f, 1.f);
-                                  pixels[pixelIndex].g = 255.f * Clamp<float>(currPixel.g, 0.f, 1.f);
-                                  pixels[pixelIndex].b = 255.f * Clamp<float>(currPixel.b, 0.f, 1.f);
-                                  pixels[pixelIndex].a = 255.f;
+                                      pixels[pixelIndex].r = (pixels[pixelIndex].r * s + (255.f * currPixel.r)) / (s + 1);
+                                      pixels[pixelIndex].g = (pixels[pixelIndex].g * s + (255.f * currPixel.g)) / (s + 1);
+                                      pixels[pixelIndex].b = (pixels[pixelIndex].b * s + (255.f * currPixel.b)) / (s + 1);
+                                      pixels[pixelIndex].a = 255.f;
+                                  }
                               }
-                          }
-                      });
+                          });
 
-    MRenderView::updatePixels(0, renderSettings.width - 1, 0, renderSettings.height - 1, pixels);
-    MRenderView::refresh(0, renderSettings.width - 1, 0, renderSettings.height - 1);
+        MRenderView::updatePixels(0, renderSettings.width - 1, 0, renderSettings.height - 1, pixels);
+        MRenderView::refresh(0, renderSettings.width - 1, 0, renderSettings.height - 1);
+
+        sampler->PrepareNextSample();
+    }
 
     delete[] pixels;
 
