@@ -26,10 +26,10 @@ MStatus RenderGlobalsNode::initialize()
     MStatus status;
     MFnNumericAttribute numAttr;
 
-    samples = numAttr.create("samples", "samples", MFnNumericData::kInt, 8, &status);
+    samples = numAttr.create("samples", "samples", MFnNumericData::kInt, 1, &status);
     FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to add [Samples] Attribute.");
     numAttr.setMin(1);
-    numAttr.setMax(1024);
+    numAttr.setMax(12000);
     addAttribute(samples);
 
     return (MS::kSuccess);

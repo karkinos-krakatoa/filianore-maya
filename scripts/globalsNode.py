@@ -110,9 +110,9 @@ class FilianoreRendererCommonTab(FilianoreRendererGenericTab):
                             columnWidth=(3, 160),
                             columnAttach=(1, "left", 4),
                             minValue=1,
-                            maxValue=100,
+                            maxValue=12000,
                             fieldMinValue=1,
-                            fieldMaxValue=100,
+                            fieldMaxValue=12000,
                             attribute="filianoreRendererGlobalsNode.samples")
 
         pm.setUITemplate("renderGlobalsTemplate", popTemplate=True)
