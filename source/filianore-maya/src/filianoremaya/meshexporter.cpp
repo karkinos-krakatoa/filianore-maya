@@ -91,7 +91,7 @@ MayaMesh::MayaMesh(MFnMesh &_mesh)
 
             std::shared_ptr<Shape> triangle = std::make_shared<Triangle>(t1, t2, t3);
 
-            RGBSpectrum col(0.380f);
+            RGBSpectrum col(0.f, 0.277f, 1.f);
             std::shared_ptr<Texture<RGBSpectrum>> tex = std::make_shared<ConstantTexture<RGBSpectrum>>(col);
             std::shared_ptr<Material> material = std::make_shared<LambertMaterial>(tex);
 
