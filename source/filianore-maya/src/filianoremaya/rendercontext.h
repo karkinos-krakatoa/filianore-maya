@@ -4,6 +4,7 @@
 struct RenderContext
 {
     int samples;
+    int rayDepth;
 };
 
 #endif

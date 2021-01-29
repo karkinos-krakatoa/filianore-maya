@@ -115,6 +115,16 @@ class FilianoreRendererCommonTab(FilianoreRendererGenericTab):
                             fieldMaxValue=12000,
                             attribute="filianoreRendererGlobalsNode.samples")
 
+                        pm.attrFieldSliderGrp(
+                            label="Ray Depth:",
+                            columnWidth=(3, 160),
+                            columnAttach=(1, "left", 4),
+                            minValue=0,
+                            maxValue=100,
+                            fieldMinValue=0,
+                            fieldMaxValue=100,
+                            attribute="filianoreRendererGlobalsNode.rayDepth")
+
         pm.setUITemplate("renderGlobalsTemplate", popTemplate=True)
         pm.setUITemplate("attributeEditorTemplate", popTemplate=True)
         pm.formLayout(

@@ -48,9 +48,10 @@ std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants()
 
             TransformVectors transformData = GetDagObjectTransformData(dagPath);
             RGBSpectrum color = RGBSpectrum(pointIllum.color().r, pointIllum.color().g, pointIllum.color().b);
-            float weight = pointIllum.intensity();
+            RGBSpectrum shadowColor = RGBSpectrum(pointIllum.shadowColor().r, pointIllum.shadowColor().g, pointIllum.shadowColor().b);
+            float intensity = pointIllum.intensity();
 
-            std::shared_ptr<Illuminant> actualPointIllum = std::make_shared<PointIlluminant>(transformData.Translate, color, weight);
+            std::shared_ptr<Illuminant> actualPointIllum = std::make_shared<PointIlluminant>(transformData.Translate, color, intensity, pointIllum.decayRate(), shadowColor);
             illums.emplace_back(actualPointIllum);
         }
     }
