@@ -10,6 +10,7 @@
 #include <maya/MFnLight.h>
 #include <maya/MFnPointLight.h>
 #include <maya/MFnSpotLight.h>
+#include <maya/MFnDirectionalLight.h>
 #include <maya/MColor.h>
 
 #include "illuminantsexporter.h"
@@ -20,6 +21,7 @@
 
 #include "filianore/illuminants/point.h"
 #include "filianore/illuminants/spot.h"
+#include "filianore/illuminants/directional.h"
 
 using namespace filianore;
 
@@ -48,7 +50,7 @@ std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants()
             MFnPointLight pointIllum(dagPath, &status);
             if (!status)
             {
-                status.perror("MFnLight constructor");
+                status.perror("MFnPointLight constructor");
                 continue;
             }
 
@@ -65,7 +67,7 @@ std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants()
             MFnSpotLight spotLight(dagPath, &status);
             if (!status)
             {
-                status.perror("MFnLight constructor");
+                status.perror("MFnSpotLight constructor");
                 continue;
             }
 
@@ -78,6 +80,25 @@ std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants()
                                                                                        (float)spotLight.coneAngle(), (float)spotLight.penumbraAngle(),
                                                                                        true, true,
                                                                                        color, intensity, spotLight.decayRate(), shadowColor);
+            illums.emplace_back(actualIllum);
+        }
+
+        if (dagPath.hasFn(MFn::kDirectionalLight))
+        {
+            MFnDirectionalLight dirLight(dagPath, &status);
+            if (!status)
+            {
+                status.perror("MFnDirectionalLight constructor");
+                continue;
+            }
+
+            RGBSpectrum color = RGBSpectrum(dirLight.color().r, dirLight.color().g, dirLight.color().b);
+            RGBSpectrum shadowColor = RGBSpectrum(dirLight.shadowColor().r, dirLight.shadowColor().g, dirLight.shadowColor().b);
+            float intensity = dirLight.intensity();
+            MFloatVector direction = dirLight.lightDirection(0, MSpace::kWorld);
+
+            std::shared_ptr<Illuminant> actualIllum = std::make_shared<DirectionalIlluminant>(transform, StaticArray<float, 3>(direction.x, direction.y, direction.z),
+                                                                                              color, intensity, shadowColor);
             illums.emplace_back(actualIllum);
         }
     }
