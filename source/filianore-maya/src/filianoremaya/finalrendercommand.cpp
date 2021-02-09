@@ -81,23 +81,6 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
         std::cerr << e.what() << '\n';
     }
 
-    // Illum setup
-    IlluminantExporter illumExporter;
-    std::vector<std::shared_ptr<Illuminant>> illums;
-    try
-    {
-        illums = illumExporter.ExportIlluminants();
-
-        auto illumsSize = std::to_string(illums.size());
-        MString illumsCount = illumsSize.c_str();
-        FILIANORE_MAYA_LOG_INFO("Illums Count - " + illumsCount);
-    }
-    catch (const std::exception &e)
-    {
-        FILIANORE_MAYA_LOG_ERROR("Error in getting/initializing the Scene Illuminants.");
-        std::cerr << e.what() << '\n';
-    }
-
     // Meshes setup
     MeshExporter meshExporter;
     std::vector<std::shared_ptr<Primitive>> scenePrimitives;
@@ -117,6 +100,23 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
     catch (const std::exception &e)
     {
         FILIANORE_MAYA_LOG_ERROR("Error in getting/initializing the Scene Primitives.");
+        std::cerr << e.what() << '\n';
+    }
+
+    // Illum setup
+    IlluminantExporter illumExporter;
+    std::vector<std::shared_ptr<Illuminant>> illums;
+    try
+    {
+        illums = illumExporter.ExportIlluminants(&scenePrimitives);
+
+        auto illumsSize = std::to_string(illums.size());
+        MString illumsCount = illumsSize.c_str();
+        FILIANORE_MAYA_LOG_INFO("Illums Count - " + illumsCount);
+    }
+    catch (const std::exception &e)
+    {
+        FILIANORE_MAYA_LOG_ERROR("Error in getting/initializing the Scene Illuminants.");
         std::cerr << e.what() << '\n';
     }
 

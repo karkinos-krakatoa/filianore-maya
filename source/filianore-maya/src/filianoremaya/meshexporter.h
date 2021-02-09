@@ -8,6 +8,8 @@
 
 #include "filianore/core/elemental.h"
 
+using namespace filianore;
+
 class MayaMesh
 {
 public:
@@ -18,7 +20,7 @@ public:
     MayaMesh(MFnMesh &_mesh);
 
     std::string name;
-    std::vector<std::shared_ptr<filianore::Primitive>> primitives;
+    std::vector<std::shared_ptr<Primitive>> primitives;
 };
 
 class MeshExporter
@@ -28,7 +30,7 @@ public:
     {
     }
 
-    std::vector<std::shared_ptr<filianore::Primitive>> ExportPrimitives();
+    std::vector<std::shared_ptr<Primitive>> ExportPrimitives();
 };
 
 #endif

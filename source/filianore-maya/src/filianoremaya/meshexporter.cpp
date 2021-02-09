@@ -117,7 +117,7 @@ MayaMesh::MayaMesh(MFnMesh &_mesh)
             std::shared_ptr<Texture<RGBSpectrum>> tex = std::make_shared<ConstantTexture<RGBSpectrum>>(col);
             std::shared_ptr<Material> material = std::make_shared<LambertMaterial>(tex);
 
-            std::shared_ptr<Primitive> primitive = std::make_shared<GeometricPrimitive>(triangle, material);
+            std::shared_ptr<Primitive> primitive = std::make_shared<GeometricPrimitive>(triangle, material, nullptr);
 
             primitives.emplace_back(primitive);
         }
