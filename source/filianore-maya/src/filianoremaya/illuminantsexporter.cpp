@@ -121,8 +121,12 @@ std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants(s
                 continue;
             }
 
+            Transform _transform = Translate(transformData.Translate) *
+                                   (RotateX(transformData.Rotate.x(), true) * RotateY(transformData.Rotate.y(), true) * RotateZ(transformData.Rotate.z(), true)) *
+                                   Scale(transformData.Scale.x(), transformData.Scale.y(), transformData.Scale.z());
+
             ShapeCreator shapeCreator;
-            std::vector<std::shared_ptr<Shape>> quad = shapeCreator.CreateQuad(transform);
+            std::vector<std::shared_ptr<Shape>> quad = shapeCreator.CreateQuad(_transform);
 
             RGBSpectrum color = RGBSpectrum(areaLight.color().r, areaLight.color().g, areaLight.color().b);
             RGBSpectrum shadowColor = RGBSpectrum(areaLight.shadowColor().r, areaLight.shadowColor().g, areaLight.shadowColor().b);
@@ -130,7 +134,7 @@ std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants(s
 
             for (auto shape : quad)
             {
-                const std::shared_ptr<AreaIlluminant> areaIllum = std::make_shared<DiffuseAreaIlluminant>(transform, color, intensity, areaLight.decayRate(), shadowColor, shape);
+                const std::shared_ptr<AreaIlluminant> areaIllum = std::make_shared<DiffuseAreaIlluminant>(_transform, color, intensity, areaLight.decayRate(), shadowColor, shape);
                 //prims->emplace_back(std::make_shared<GeometricPrimitive>(shape, nullptr, areaIllum));
                 illums.emplace_back(areaIllum);
             }

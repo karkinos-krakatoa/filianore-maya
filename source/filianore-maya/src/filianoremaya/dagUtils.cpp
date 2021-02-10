@@ -32,7 +32,7 @@ TransformVectors GetDagObjectTransformData(const MDagPath &dagPath)
 
     double scaleValues[3];
     matrix.getScale(scaleValues, MSpace::kWorld);
-    transformVecs.Rotate = StaticArray<float, 3>((float)scaleValues[0], (float)scaleValues[1], (float)scaleValues[2]);
+    transformVecs.Scale = StaticArray<float, 3>((float)scaleValues[0], (float)scaleValues[1], (float)scaleValues[2]);
 
     return transformVecs;
 }
