@@ -131,7 +131,7 @@ std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants(s
             for (auto shape : quad)
             {
                 const std::shared_ptr<AreaIlluminant> areaIllum = std::make_shared<DiffuseAreaIlluminant>(transform, color, intensity, areaLight.decayRate(), shadowColor, shape);
-                prims->emplace_back(std::make_shared<GeometricPrimitive>(shape, nullptr, areaIllum));
+                //prims->emplace_back(std::make_shared<GeometricPrimitive>(shape, nullptr, areaIllum));
                 illums.emplace_back(areaIllum);
             }
         }

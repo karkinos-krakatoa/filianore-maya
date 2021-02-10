@@ -153,7 +153,7 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
 
                                       RGBSpectrum currPixel(0.f);
                                       currPixel = integrator->Li(ray, scene, *sampler, 0);
-                                      //currPixel = GammaCorrect(currPixel);
+                                      currPixel = GammaCorrect(currPixel);
 
                                       pixels[pixelIndex].r = (pixels[pixelIndex].r * s + (255.f * currPixel.r)) / (s + 1);
                                       pixels[pixelIndex].g = (pixels[pixelIndex].g * s + (255.f * currPixel.g)) / (s + 1);
