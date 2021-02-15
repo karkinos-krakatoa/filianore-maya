@@ -54,6 +54,9 @@ set(SOURCE_FILES
   src/filianoremaya/meshexporter.cpp
   src/filianoremaya/illuminantsexporter.cpp
   src/filianoremaya/renderglobalsnode.cpp
+  src/filianoremaya/lambertnode.cpp
+  src/filianoremaya/lambertshader.cpp
+  src/filianoremaya/materialprocessor.cpp
   src/filianoremaya/finalrendercommand.cpp
   src/filianoremaya/pluginmain.cpp)
 

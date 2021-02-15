@@ -10,6 +10,7 @@
 
 #include "util.h"
 #include "meshexporter.h"
+#include "materialprocessor.h"
 
 #include "filianore/color/rgb.h"
 
@@ -30,6 +31,8 @@ using TriEntity = TriangleEntity;
 MayaMesh::MayaMesh(MFnMesh &_mesh)
     : name(_mesh.name().asChar())
 {
+    std::shared_ptr<Material> material = ProcessMeshMaterials(_mesh);
+
     MDagPath mDag;
     MMatrix mMatrix;
     if (_mesh.getPath(mDag) == MS::kSuccess)
@@ -112,11 +115,6 @@ MayaMesh::MayaMesh(MFnMesh &_mesh)
             TriEntity t3(triV3, triN3, true, uv3);
 
             std::shared_ptr<Shape> triangle = std::make_shared<Triangle>(t1, t2, t3);
-
-            RGBSpectrum col(0.5f);
-            std::shared_ptr<Texture<RGBSpectrum>> tex = std::make_shared<ConstantTexture<RGBSpectrum>>(col);
-            std::shared_ptr<Material> material = std::make_shared<LambertMaterial>(tex);
-
             std::shared_ptr<Primitive> primitive = std::make_shared<GeometricPrimitive>(triangle, material, nullptr);
 
             primitives.emplace_back(primitive);
