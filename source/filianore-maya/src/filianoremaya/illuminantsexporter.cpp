@@ -29,6 +29,9 @@
 #include "filianore/shapes/triangle.h"
 #include "filianore/core/primitive.h"
 
+#include "filianore/textures/constant.h"
+#include "filianore/materials/lambert.h"
+
 using namespace filianore;
 
 using Vec3 = StaticArray<float, 3>;
@@ -53,7 +56,6 @@ std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants(s
 
         TransformVectors transformData = GetDagObjectTransformData(dagPath);
         Transform transform = Translate(transformData.Translate);
-        //transform = transform * (RotateX(transformData.Rotate.x(), true) * RotateY(transformData.Rotate.y(), true) * RotateZ(transformData.Rotate.z(), true));
 
         if (dagPath.hasFn(MFn::kPointLight))
         {
@@ -132,10 +134,14 @@ std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants(s
             RGBSpectrum shadowColor = RGBSpectrum(areaLight.shadowColor().r, areaLight.shadowColor().g, areaLight.shadowColor().b);
             float intensity = areaLight.intensity();
 
+            RGBSpectrum col(1.f);
+            std::shared_ptr<Texture<RGBSpectrum>> tex = std::make_shared<ConstantTexture<RGBSpectrum>>(col);
+            std::shared_ptr<Material> defaultMaterial = std::make_shared<LambertMaterial>(tex);
+
             for (auto shape : quad)
             {
                 const std::shared_ptr<AreaIlluminant> areaIllum = std::make_shared<DiffuseAreaIlluminant>(_transform, color, intensity, areaLight.decayRate(), shadowColor, shape);
-                //prims->emplace_back(std::make_shared<GeometricPrimitive>(shape, nullptr, areaIllum));
+                prims->emplace_back(std::make_shared<GeometricPrimitive>(shape, defaultMaterial, areaIllum));
                 illums.emplace_back(areaIllum);
             }
         }

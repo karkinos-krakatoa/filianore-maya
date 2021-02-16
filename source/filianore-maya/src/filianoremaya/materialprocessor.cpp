@@ -2,6 +2,7 @@
 #include "util.h"
 
 #include "lambertnode.h"
+#include "mirrormaterialnode.h"
 
 #include <maya/MObjectArray.h>
 #include <maya/MIntArray.h>
@@ -12,6 +13,7 @@
 
 #include "filianore/textures/constant.h"
 #include "filianore/materials/lambert.h"
+#include "filianore/materials/mirror.h"
 
 std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
 {
@@ -48,6 +50,18 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
         std::shared_ptr<Material> lambertMaterial = std::make_shared<LambertMaterial>(diffuseTex);
 
         return lambertMaterial;
+    }
+
+    if (materialName.find("flMirrorShader") != std::string::npos)
+    {
+        MPlug mColorPlug(mShaderObject, MirrorMaterialNode::aColor);
+        MFloatVector mColor = mColorPlug.asMDataHandle().asFloatVector();
+
+        RGBSpectrum specularColor(mColor.x, mColor.y, mColor.z);
+        std::shared_ptr<Texture<RGBSpectrum>> specularTex = std::make_shared<ConstantTexture<RGBSpectrum>>(specularColor);
+        std::shared_ptr<Material> mirrorMaterial = std::make_shared<MirrorMaterial>(specularTex);
+
+        return mirrorMaterial;
     }
 
     return defaultMaterial;

@@ -3,6 +3,8 @@
 
 #include "lambertnode.h"
 #include "lambertshader.h"
+#include "mirrormaterialnode.h"
+#include "mirrorshader.h"
 
 #include "renderglobalsnode.h"
 #include "finalrendercommand.h"
@@ -24,6 +26,11 @@ MStatus initializePlugin(MObject plugin)
 	MString sLambertFullClassification("shader/surface:" + sDrawLambertDBClassification);
 	fnPlugin.registerNode(LambertNode::name, LambertNode::id, LambertNode::creator, LambertNode::initialize, MPxNode::kDependNode, &sLambertFullClassification);
 	MHWRender::MDrawRegistry::registerSurfaceShadingNodeOverrideCreator(sDrawLambertDBClassification, LambertNode::name, LambertShader::creator);
+
+	MString sDrawMirrorMaterialDBClassification("drawdb/shader/surface/" + MirrorMaterialNode::name);
+	MString sMirrorMaterialFullClassification("shader/surface:" + sDrawMirrorMaterialDBClassification);
+	fnPlugin.registerNode(MirrorMaterialNode::name, MirrorMaterialNode::id, MirrorMaterialNode::creator, MirrorMaterialNode::initialize, MPxNode::kDependNode, &sMirrorMaterialFullClassification);
+	MHWRender::MDrawRegistry::registerSurfaceShadingNodeOverrideCreator(sDrawMirrorMaterialDBClassification, MirrorMaterialNode::name, MirrorShader::creator);
 
 	// Commands
 	status = fnPlugin.registerCommand(FinalRenderCommand::commandName, FinalRenderCommand::creator);
@@ -52,6 +59,10 @@ MStatus uninitializePlugin(MObject plugin)
 	MString sDrawLambertDBClassification("drawdb/shader/surface/" + LambertNode::name);
 	fnPlugin.deregisterNode(LambertNode::id);
 	MHWRender::MDrawRegistry::deregisterSurfaceShadingNodeOverrideCreator(sDrawLambertDBClassification, LambertNode::name);
+
+	MString sDrawMirrorMaterialDBClassification("drawdb/shader/surface/" + MirrorMaterialNode::name);
+	fnPlugin.deregisterNode(MirrorMaterialNode::id);
+	MHWRender::MDrawRegistry::deregisterSurfaceShadingNodeOverrideCreator(sDrawMirrorMaterialDBClassification, MirrorMaterialNode::name);
 
 	// Commands
 	status = fnPlugin.deregisterCommand(FinalRenderCommand::commandName);
