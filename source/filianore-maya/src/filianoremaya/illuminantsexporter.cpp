@@ -18,8 +18,6 @@
 #include "util.h"
 #include "dagUtils.h"
 
-#include "filianore/color/rgb.h"
-
 #include "filianore/illuminants/point.h"
 #include "filianore/illuminants/spot.h"
 #include "filianore/illuminants/directional.h"
@@ -31,6 +29,9 @@
 
 #include "filianore/textures/constant.h"
 #include "filianore/materials/lambert.h"
+
+#include "filianore/color/spectrumoperations.h"
+#include "filianore/color/spectruminits.h"
 
 using namespace filianore;
 
@@ -66,8 +67,8 @@ std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants(s
                 continue;
             }
 
-            RGBSpectrum color = RGBSpectrum(pointIllum.color().r, pointIllum.color().g, pointIllum.color().b);
-            RGBSpectrum shadowColor = RGBSpectrum(pointIllum.shadowColor().r, pointIllum.shadowColor().g, pointIllum.shadowColor().b);
+            PrincipalSpectrum color = FromIlluminanceRGB(StaticArray<float, 3>(pointIllum.color().r, pointIllum.color().g, pointIllum.color().b));
+            PrincipalSpectrum shadowColor = FromReflectanceRGB(StaticArray<float, 3>(pointIllum.shadowColor().r, pointIllum.shadowColor().g, pointIllum.shadowColor().b));
             float intensity = pointIllum.intensity();
 
             std::shared_ptr<Illuminant> actualIllum = std::make_shared<PointIlluminant>(transform, color, intensity, pointIllum.decayRate(), shadowColor);
@@ -83,8 +84,8 @@ std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants(s
                 continue;
             }
 
-            RGBSpectrum color = RGBSpectrum(spotLight.color().r, spotLight.color().g, spotLight.color().b);
-            RGBSpectrum shadowColor = RGBSpectrum(spotLight.shadowColor().r, spotLight.shadowColor().g, spotLight.shadowColor().b);
+            PrincipalSpectrum color = FromIlluminanceRGB(StaticArray<float, 3>(spotLight.color().r, spotLight.color().g, spotLight.color().b));
+            PrincipalSpectrum shadowColor = FromReflectanceRGB(StaticArray<float, 3>(spotLight.shadowColor().r, spotLight.shadowColor().g, spotLight.shadowColor().b));
             float intensity = spotLight.intensity();
             MFloatVector direction = spotLight.lightDirection(0, MSpace::kWorld);
 
@@ -104,8 +105,8 @@ std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants(s
                 continue;
             }
 
-            RGBSpectrum color = RGBSpectrum(dirLight.color().r, dirLight.color().g, dirLight.color().b);
-            RGBSpectrum shadowColor = RGBSpectrum(dirLight.shadowColor().r, dirLight.shadowColor().g, dirLight.shadowColor().b);
+            PrincipalSpectrum color = FromIlluminanceRGB(StaticArray<float, 3>(dirLight.color().r, dirLight.color().g, dirLight.color().b));
+            PrincipalSpectrum shadowColor = FromReflectanceRGB(StaticArray<float, 3>(dirLight.shadowColor().r, dirLight.shadowColor().g, dirLight.shadowColor().b));
             float intensity = dirLight.intensity();
             MFloatVector direction = dirLight.lightDirection(0, MSpace::kWorld);
 
@@ -130,12 +131,13 @@ std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants(s
             ShapeCreator shapeCreator;
             std::vector<std::shared_ptr<Shape>> quad = shapeCreator.CreateQuad(_transform);
 
-            RGBSpectrum color = RGBSpectrum(areaLight.color().r, areaLight.color().g, areaLight.color().b);
-            RGBSpectrum shadowColor = RGBSpectrum(areaLight.shadowColor().r, areaLight.shadowColor().g, areaLight.shadowColor().b);
+            PrincipalSpectrum color = FromIlluminanceRGB(StaticArray<float, 3>(areaLight.color().r, areaLight.color().g, areaLight.color().b));
+            PrincipalSpectrum shadowColor = FromReflectanceRGB(StaticArray<float, 3>(areaLight.shadowColor().r, areaLight.shadowColor().g, areaLight.shadowColor().b));
+
             float intensity = areaLight.intensity();
 
-            RGBSpectrum col(1.f);
-            std::shared_ptr<Texture<RGBSpectrum>> tex = std::make_shared<ConstantTexture<RGBSpectrum>>(col);
+            PrincipalSpectrum col(1.f);
+            std::shared_ptr<Texture<PrincipalSpectrum>> tex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(col);
             std::shared_ptr<Material> defaultMaterial = std::make_shared<LambertMaterial>(tex);
 
             for (auto shape : quad)

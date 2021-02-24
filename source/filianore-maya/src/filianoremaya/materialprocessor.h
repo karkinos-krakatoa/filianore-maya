@@ -9,6 +9,4 @@ using namespace filianore;
 
 std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh);
 
-//std::shared_ptr<Material> CreateDefaultLambertMaterial();
-
 #endif

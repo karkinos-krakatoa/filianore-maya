@@ -9,16 +9,17 @@
 #include <maya/MFnDependencyNode.h>
 #include <maya/MPlug.h>
 
-#include "filianore/color/rgb.h"
-
 #include "filianore/textures/constant.h"
 #include "filianore/materials/lambert.h"
 #include "filianore/materials/mirror.h"
 
+#include "filianore/color/spectrumoperations.h"
+#include "filianore/color/spectruminits.h"
+
 std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
 {
-    RGBSpectrum col(0.5f);
-    std::shared_ptr<Texture<RGBSpectrum>> tex = std::make_shared<ConstantTexture<RGBSpectrum>>(col);
+    PrincipalSpectrum col = FromReflectanceRGB(StaticArray<float, 3>(0.5f));
+    std::shared_ptr<Texture<PrincipalSpectrum>> tex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(col);
     std::shared_ptr<Material> defaultMaterial = std::make_shared<LambertMaterial>(tex);
 
     MObjectArray mShaderArray;
@@ -45,8 +46,8 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
         MPlug mDiffuseColorPlug(mShaderObject, LambertNode::aDiffuseColor);
         MFloatVector mDiffuseColor = mDiffuseColorPlug.asMDataHandle().asFloatVector();
 
-        RGBSpectrum diffuseColor(mDiffuseColor.x, mDiffuseColor.y, mDiffuseColor.z);
-        std::shared_ptr<Texture<RGBSpectrum>> diffuseTex = std::make_shared<ConstantTexture<RGBSpectrum>>(diffuseColor);
+        PrincipalSpectrum diffuseColor = FromReflectanceRGB(StaticArray<float, 3>(mDiffuseColor.x, mDiffuseColor.y, mDiffuseColor.z));
+        std::shared_ptr<Texture<PrincipalSpectrum>> diffuseTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(diffuseColor);
         std::shared_ptr<Material> lambertMaterial = std::make_shared<LambertMaterial>(diffuseTex);
 
         return lambertMaterial;
@@ -57,8 +58,8 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
         MPlug mColorPlug(mShaderObject, MirrorMaterialNode::aColor);
         MFloatVector mColor = mColorPlug.asMDataHandle().asFloatVector();
 
-        RGBSpectrum specularColor(mColor.x, mColor.y, mColor.z);
-        std::shared_ptr<Texture<RGBSpectrum>> specularTex = std::make_shared<ConstantTexture<RGBSpectrum>>(specularColor);
+        PrincipalSpectrum specularColor = FromReflectanceRGB(StaticArray<float, 3>(mColor.x, mColor.y, mColor.z));
+        std::shared_ptr<Texture<PrincipalSpectrum>> specularTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(specularColor);
         std::shared_ptr<Material> mirrorMaterial = std::make_shared<MirrorMaterial>(specularTex);
 
         return mirrorMaterial;

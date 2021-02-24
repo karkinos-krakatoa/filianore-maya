@@ -18,6 +18,9 @@
 #include "filianore/samplers/whitenoise.h"
 #include "filianore/integrators/pathintegrator.h"
 
+#include "filianore/color/spectrumoperations.h"
+#include "filianore/color/spectruminits.h"
+
 #include "cameraexporter.h"
 #include "meshexporter.h"
 #include "illuminantsexporter.h"
@@ -151,13 +154,14 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
 
                                       Ray ray = camera->AwakenRay(StaticArray<float, 2>(u, v), StaticArray<float, 2>(0.332f, 0.55012f));
 
-                                      RGBSpectrum currPixel(0.f);
-                                      currPixel = integrator->Li(ray, scene, *sampler, 0);
+                                      PrincipalSpectrum currPixelSpec = integrator->Li(ray, scene, *sampler, 0);
+                                      StaticArray<float, 3> currPixel(0.f);
+                                      currPixel = ToRGB(currPixelSpec);
                                       currPixel = GammaCorrect(currPixel);
 
-                                      pixels[pixelIndex].r = (pixels[pixelIndex].r * s + (255.f * currPixel.r)) / (s + 1);
-                                      pixels[pixelIndex].g = (pixels[pixelIndex].g * s + (255.f * currPixel.g)) / (s + 1);
-                                      pixels[pixelIndex].b = (pixels[pixelIndex].b * s + (255.f * currPixel.b)) / (s + 1);
+                                      pixels[pixelIndex].r = (pixels[pixelIndex].r * s + (255.f * currPixel.x())) / (s + 1);
+                                      pixels[pixelIndex].g = (pixels[pixelIndex].g * s + (255.f * currPixel.y())) / (s + 1);
+                                      pixels[pixelIndex].b = (pixels[pixelIndex].b * s + (255.f * currPixel.z())) / (s + 1);
                                       pixels[pixelIndex].a = 255.f;
                                   }
                               }

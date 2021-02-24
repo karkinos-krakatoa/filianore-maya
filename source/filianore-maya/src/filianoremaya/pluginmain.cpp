@@ -9,10 +9,15 @@
 #include "renderglobalsnode.h"
 #include "finalrendercommand.h"
 
+#include "filianore/color/spectruminits.h"
+
 #include "util.h"
 
 MStatus initializePlugin(MObject plugin)
 {
+	// Filianore Inits
+	filianore::InitializeSpectrals();
+
 	MStatus status;
 	MFnPlugin fnPlugin(plugin, FILIANORE_MAYA_NAME, FILIANORE_MAYA_VERSION);
 

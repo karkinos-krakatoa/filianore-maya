@@ -328,7 +328,7 @@ MStatus MirrorMaterialNode::compute(const MPlug &plug, MDataBlock &block)
 
             if (cosln > 0.0f)
             {
-                resultColor += lightIntensity * (cosln * 0.2);
+                resultColor += lightIntensity * (cosln * 60.f);
             }
         }
 
