@@ -25,7 +25,8 @@ private:
     static RenderContext context;
 
     static MObject samples;
-    static MObject rayDepth;
+    static MObject diffuseRayDepth;
+    static MObject specularRayDepth;
 };
 
 #endif

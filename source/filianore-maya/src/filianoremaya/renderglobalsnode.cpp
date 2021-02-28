@@ -15,7 +15,8 @@ const MTypeId RenderGlobalsNode::id(0x00132b41);
 RenderContext RenderGlobalsNode::context;
 
 MObject RenderGlobalsNode::samples;
-MObject RenderGlobalsNode::rayDepth;
+MObject RenderGlobalsNode::diffuseRayDepth;
+MObject RenderGlobalsNode::specularRayDepth;
 
 void *RenderGlobalsNode::creator()
 {
@@ -33,11 +34,17 @@ MStatus RenderGlobalsNode::initialize()
     numAttr.setMax(12000);
     addAttribute(samples);
 
-    rayDepth = numAttr.create("rayDepth", "rayDepth", MFnNumericData::kInt, 1, &status);
-    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to add [Ray Depth] Attribute.");
+    diffuseRayDepth = numAttr.create("diffuseRayDepth", "diffuseRayDepth", MFnNumericData::kInt, 0, &status);
+    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to add [Diffuse Ray Depth] Attribute.");
     numAttr.setMin(0);
     numAttr.setMax(100);
-    addAttribute(rayDepth);
+    addAttribute(diffuseRayDepth);
+
+    specularRayDepth = numAttr.create("specularRayDepth", "specularRayDepth", MFnNumericData::kInt, 0, &status);
+    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to add [Specular Ray Depth] Attribute.");
+    numAttr.setMin(0);
+    numAttr.setMax(100);
+    addAttribute(specularRayDepth);
 
     return (MS::kSuccess);
 }
@@ -60,9 +67,13 @@ const RenderContext &RenderGlobalsNode::fetchContext()
     status = mSamplesPlug.getValue(context.samples);
     FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Samples] Attribute value.");
 
-    MPlug mRayDepthPlug(mObj, rayDepth);
-    status = mRayDepthPlug.getValue(context.rayDepth);
-    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Ray Depth] Attribute value.");
+    MPlug mDiffuseRayDepthPlug(mObj, diffuseRayDepth);
+    status = mDiffuseRayDepthPlug.getValue(context.diffuseRayDepth);
+    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Diffuse Ray Depth] Attribute value.");
+
+    MPlug mSpecularRayDepthPlug(mObj, specularRayDepth);
+    status = mSpecularRayDepthPlug.getValue(context.specularRayDepth);
+    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Specular Ray Depth] Attribute value.");
 
     return (context);
 }
@@ -80,7 +91,8 @@ void RenderGlobalsNode::clean()
     MDGModifier modifier;
 
     modifier.deleteNode(samples);
-    modifier.deleteNode(rayDepth);
+    modifier.deleteNode(diffuseRayDepth);
+    modifier.deleteNode(specularRayDepth);
 
     modifier.deleteNode(mObj);
 

@@ -129,7 +129,7 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
     // Render components setup
     Scene scene(bvh, illums);
     std::shared_ptr<Sampler> sampler = std::make_shared<Whitenoise>();
-    std::unique_ptr<Integrator> integrator = std::make_unique<PathIntegrator>(renderingContext.rayDepth);
+    std::unique_ptr<Integrator> integrator = std::make_unique<PathIntegrator>(renderingContext.diffuseRayDepth, renderingContext.specularRayDepth);
     integrator->PrepareTheRenderer(scene, *sampler);
 
     // Main Render Loop

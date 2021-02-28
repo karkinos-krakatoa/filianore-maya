@@ -108,22 +108,40 @@ class FilianoreRendererCommonTab(FilianoreRendererGenericTab):
                         pm.attrFieldSliderGrp(
                             label="Sample Count:",
                             columnWidth=(3, 160),
-                            columnAttach=(1, "left", 4),
+                            columnAttach=(1, "right", 4),
                             minValue=1,
                             maxValue=12000,
                             fieldMinValue=1,
                             fieldMaxValue=12000,
                             attribute="filianoreRendererGlobalsNode.samples")
 
+                with pm.frameLayout("rayDepthFrameLayout", label="Ray Bounces", collapsable=True, collapse=False):
+                    with pm.columnLayout("rayDepthColumnLayout", adjustableColumn=True, width=380,
+                                         rowSpacing=2):
+
+                        pm.separator(height=2)
+
                         pm.attrFieldSliderGrp(
-                            label="Ray Depth:",
+                            label="Diffuse:",
                             columnWidth=(3, 160),
-                            columnAttach=(1, "left", 4),
+                            columnAttach=(1, "right", 4),
                             minValue=0,
                             maxValue=100,
                             fieldMinValue=0,
                             fieldMaxValue=100,
-                            attribute="filianoreRendererGlobalsNode.rayDepth")
+                            attribute="filianoreRendererGlobalsNode.diffuseRayDepth")
+
+                        pm.separator(height=2)
+
+                        pm.attrFieldSliderGrp(
+                            label="Specular:",
+                            columnWidth=(3, 160),
+                            columnAttach=(1, "right", 4),
+                            minValue=0,
+                            maxValue=100,
+                            fieldMinValue=0,
+                            fieldMaxValue=100,
+                            attribute="filianoreRendererGlobalsNode.specularRayDepth")
 
         pm.setUITemplate("renderGlobalsTemplate", popTemplate=True)
         pm.setUITemplate("attributeEditorTemplate", popTemplate=True)
