@@ -3,7 +3,9 @@
 
 #include <maya/MPxNode.h>
 
-#include "rendercontext.h"
+#include "filianore/core/renderparams.h"
+
+using namespace filianore;
 
 class RenderGlobalsNode : public MPxNode
 {
@@ -16,13 +18,13 @@ public:
 
     MStatus compute(const MPlug &plug, MDataBlock &dataBlock) override;
 
-    static const RenderContext &fetchContext();
-    static const RenderContext &getContext();
+    static const RenderParams &fetchContext();
+    static const RenderParams &getContext();
 
     static void clean();
 
 private:
-    static RenderContext context;
+    static RenderParams context;
 
     static MObject samples;
     static MObject diffuseRayDepth;

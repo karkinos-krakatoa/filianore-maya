@@ -68,7 +68,7 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
     }
 
     // Filianore Maya Render Params
-    const RenderContext &renderingContext = RenderGlobalsNode::fetchContext();
+    const RenderParams &renderParams = RenderGlobalsNode::fetchContext();
 
     // Camera setup
     CameraExporter cameraExporter;
@@ -129,7 +129,7 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
     // Render components setup
     Scene scene(bvh, illums);
     std::shared_ptr<Sampler> sampler = std::make_shared<Whitenoise>();
-    std::unique_ptr<Integrator> integrator = std::make_unique<PathIntegrator>(renderingContext.diffuseRayDepth, renderingContext.specularRayDepth);
+    std::unique_ptr<Integrator> integrator = std::make_unique<PathIntegrator>(renderParams);
     integrator->PrepareTheRenderer(scene, *sampler);
 
     // Main Render Loop
@@ -138,7 +138,7 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
 
     tbb::task_scheduler_init init(11);
 
-    for (float s = 0; s < renderingContext.samples; s++)
+    for (float s = 0; s < renderParams.samples; s++)
     {
         tbb::parallel_for(tbb::blocked_range<int>(0, renderSettings.height),
                           [renderSettings, &s, &camera, &scene, &sampler, &integrator, pixels](const tbb::blocked_range<int> &range) {

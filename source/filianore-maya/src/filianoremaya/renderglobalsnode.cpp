@@ -12,7 +12,7 @@
 const MString RenderGlobalsNode::name("filianoreRendererGlobalsNode");
 const MTypeId RenderGlobalsNode::id(0x00132b41);
 
-RenderContext RenderGlobalsNode::context;
+RenderParams RenderGlobalsNode::context;
 
 MObject RenderGlobalsNode::samples;
 MObject RenderGlobalsNode::diffuseRayDepth;
@@ -54,7 +54,7 @@ MStatus RenderGlobalsNode::compute(const MPlug &plug, MDataBlock &data)
     return (MS::kSuccess);
 }
 
-const RenderContext &RenderGlobalsNode::fetchContext()
+const RenderParams &RenderGlobalsNode::fetchContext()
 {
     MStatus status;
     MObject mObj;
@@ -78,7 +78,7 @@ const RenderContext &RenderGlobalsNode::fetchContext()
     return (context);
 }
 
-const RenderContext &RenderGlobalsNode::getContext()
+const RenderParams &RenderGlobalsNode::getContext()
 {
     return (context);
 }
