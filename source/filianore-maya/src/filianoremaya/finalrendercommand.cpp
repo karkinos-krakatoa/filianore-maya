@@ -141,7 +141,7 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
     for (float s = 0; s < renderParams.samples; s++)
     {
         tbb::parallel_for(tbb::blocked_range<int>(0, renderSettings.height),
-                          [renderSettings, &s, &camera, &scene, &sampler, &integrator, pixels](const tbb::blocked_range<int> &range) {
+                          [renderSettings, &renderParams, &s, &camera, &scene, &sampler, &integrator, pixels](const tbb::blocked_range<int> &range) {
                               for (unsigned int y = range.begin(); y != (unsigned int)range.end(); y++)
                               {
                                   for (unsigned int x = 0; x < renderSettings.width; x++)
@@ -156,8 +156,10 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
 
                                       PrincipalSpectrum currPixelSpec = integrator->Li(ray, scene, *sampler, 0);
                                       StaticArray<float, 3> currPixel(0.f);
+
                                       currPixel = ToRGB(currPixelSpec);
-                                      currPixel = GammaCorrect(currPixel);
+                                      currPixel = ToneMap(currPixel, renderParams.tonemapType);
+                                      currPixel = GammaCorrect(currPixel, renderParams.gammaCorrectType);
 
                                       pixels[pixelIndex].r = (pixels[pixelIndex].r * s + (255.f * currPixel.x())) / (s + 1);
                                       pixels[pixelIndex].g = (pixels[pixelIndex].g * s + (255.f * currPixel.y())) / (s + 1);

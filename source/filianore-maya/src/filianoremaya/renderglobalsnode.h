@@ -29,6 +29,9 @@ private:
     static MObject samples;
     static MObject diffuseRayDepth;
     static MObject specularRayDepth;
+
+    static MObject gammaCorrect;
+    static MObject tonemap;
 };
 
 #endif

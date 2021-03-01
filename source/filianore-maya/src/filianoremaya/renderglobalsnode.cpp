@@ -3,6 +3,7 @@
 #include <maya/MDGModifier.h>
 #include <maya/MFnDependencyNode.h>
 #include <maya/MFnNumericAttribute.h>
+#include <maya/MFnEnumAttribute.h>
 #include <maya/MPlug.h>
 #include <maya/MPlugArray.h>
 #include <maya/MSelectionList.h>
@@ -17,6 +18,8 @@ RenderParams RenderGlobalsNode::context;
 MObject RenderGlobalsNode::samples;
 MObject RenderGlobalsNode::diffuseRayDepth;
 MObject RenderGlobalsNode::specularRayDepth;
+MObject RenderGlobalsNode::gammaCorrect;
+MObject RenderGlobalsNode::tonemap;
 
 void *RenderGlobalsNode::creator()
 {
@@ -27,6 +30,7 @@ MStatus RenderGlobalsNode::initialize()
 {
     MStatus status;
     MFnNumericAttribute numAttr;
+    MFnEnumAttribute enumAttrFn;
 
     samples = numAttr.create("samples", "samples", MFnNumericData::kInt, 1, &status);
     FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to add [Samples] Attribute.");
@@ -45,6 +49,23 @@ MStatus RenderGlobalsNode::initialize()
     numAttr.setMin(0);
     numAttr.setMax(100);
     addAttribute(specularRayDepth);
+
+    gammaCorrect = enumAttrFn.create("clrGammaCorrect", "clrGammaCorrect", 2, &status);
+    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to add [Gamma Correct] Attribute");
+    enumAttrFn.addField("None", 1);
+    enumAttrFn.addField("Rec 709", 2);
+    enumAttrFn.addField("Gamma 1.8", 3);
+    enumAttrFn.addField("Gamma 2.2", 4);
+    enumAttrFn.addField("Gamma 4.0", 5);
+    addAttribute(gammaCorrect);
+
+    tonemap = enumAttrFn.create("clrTonemap", "clrTonemap", 1, &status);
+    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to add [Tonemapping] Attribute");
+    enumAttrFn.addField("None", 1);
+    enumAttrFn.addField("ACES Basic", 2);
+    enumAttrFn.addField("Reinhard", 3);
+    enumAttrFn.addField("Filmic", 4);
+    addAttribute(tonemap);
 
     return (MS::kSuccess);
 }
@@ -75,6 +96,14 @@ const RenderParams &RenderGlobalsNode::fetchContext()
     status = mSpecularRayDepthPlug.getValue(context.specularRayDepth);
     FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Specular Ray Depth] Attribute value.");
 
+    MPlug mGammaCorrectPlug(mObj, gammaCorrect);
+    status = mGammaCorrectPlug.getValue(context.gammaCorrectType);
+    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Gamma Correct] Attribute value.");
+
+    MPlug mTonemappingPlug(mObj, tonemap);
+    status = mTonemappingPlug.getValue(context.tonemapType);
+    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Tonemapping] Attribute value.");
+
     return (context);
 }
 
@@ -93,6 +122,9 @@ void RenderGlobalsNode::clean()
     modifier.deleteNode(samples);
     modifier.deleteNode(diffuseRayDepth);
     modifier.deleteNode(specularRayDepth);
+
+    modifier.deleteNode(gammaCorrect);
+    modifier.deleteNode(tonemap);
 
     modifier.deleteNode(mObj);
 
