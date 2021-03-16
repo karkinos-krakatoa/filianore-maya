@@ -8,6 +8,12 @@
 
 using namespace filianore;
 
+struct IlluminantExporterResponse
+{
+    std::vector<std::shared_ptr<filianore::Illuminant>> illuminants;
+    std::vector<std::shared_ptr<Primitive>> prims;
+};
+
 class IlluminantExporter
 {
 public:
@@ -15,7 +21,7 @@ public:
     {
     }
 
-    std::vector<std::shared_ptr<filianore::Illuminant>> ExportIlluminants(std::vector<std::shared_ptr<Primitive>> *prims);
+    IlluminantExporterResponse ExportIlluminants(const std::vector<std::shared_ptr<Primitive>> &prims);
 };
 
 #endif

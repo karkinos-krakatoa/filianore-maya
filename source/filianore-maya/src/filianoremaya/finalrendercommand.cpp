@@ -108,10 +108,13 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
 
     // Illum setup
     IlluminantExporter illumExporter;
+    IlluminantExporterResponse illuminantExporterResponse;
     std::vector<std::shared_ptr<Illuminant>> illums;
     try
     {
-        illums = illumExporter.ExportIlluminants(&scenePrimitives);
+        illuminantExporterResponse = illumExporter.ExportIlluminants(scenePrimitives);
+        illums = illuminantExporterResponse.illuminants;
+        scenePrimitives.insert(scenePrimitives.end(), illuminantExporterResponse.prims.begin(), illuminantExporterResponse.prims.end());
 
         auto illumsSize = std::to_string(illums.size());
         MString illumsCount = illumsSize.c_str();

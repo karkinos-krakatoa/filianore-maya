@@ -39,9 +39,16 @@ using Vec3 = StaticArray<float, 3>;
 using Vec2 = StaticArray<float, 2>;
 using TriEntity = TriangleEntity;
 
-std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants(std::vector<std::shared_ptr<Primitive>> *prims)
+IlluminantExporterResponse IlluminantExporter::ExportIlluminants(const std::vector<std::shared_ptr<Primitive>> &prims)
 {
+    IlluminantExporterResponse illuminantExporterResponse;
+
+    std::vector<std::shared_ptr<Primitive>> newPrims;
     std::vector<std::shared_ptr<Illuminant>> illums;
+
+    PrincipalSpectrum col(1.f);
+    std::shared_ptr<Texture<PrincipalSpectrum>> tex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(col);
+    std::shared_ptr<Material> defaultMaterial = std::make_shared<LambertMaterial>(tex);
 
     MStatus status;
     MItDag dagIt(MItDag::kBreadthFirst, MFn::kLight, &status);
@@ -136,18 +143,20 @@ std::vector<std::shared_ptr<Illuminant>> IlluminantExporter::ExportIlluminants(s
 
             float intensity = areaLight.intensity();
 
-            PrincipalSpectrum col(1.f);
-            std::shared_ptr<Texture<PrincipalSpectrum>> tex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(col);
-            std::shared_ptr<Material> defaultMaterial = std::make_shared<LambertMaterial>(tex);
+            std::shared_ptr<AreaIlluminant> areaIllum1 = std::make_shared<DiffuseAreaIlluminant>(_transform, color, intensity, areaLight.decayRate(), shadowColor, quad.at(0));
+            std::shared_ptr<GeometricPrimitive> prim1 = std::make_shared<GeometricPrimitive>(quad.at(0), defaultMaterial, areaIllum1);
+            newPrims.emplace_back(prim1);
+            illums.emplace_back(areaIllum1);
 
-            for (auto shape : quad)
-            {
-                const std::shared_ptr<AreaIlluminant> areaIllum = std::make_shared<DiffuseAreaIlluminant>(_transform, color, intensity, areaLight.decayRate(), shadowColor, shape);
-                prims->emplace_back(std::make_shared<GeometricPrimitive>(shape, defaultMaterial, areaIllum));
-                illums.emplace_back(areaIllum);
-            }
+            std::shared_ptr<AreaIlluminant> areaIllum2 = std::make_shared<DiffuseAreaIlluminant>(_transform, color, intensity, areaLight.decayRate(), shadowColor, quad.at(1));
+            std::shared_ptr<GeometricPrimitive> prim2 = std::make_shared<GeometricPrimitive>(quad.at(1), defaultMaterial, areaIllum2);
+            newPrims.emplace_back(prim2);
+            illums.emplace_back(areaIllum2);
         }
     }
 
-    return illums;
+    illuminantExporterResponse.illuminants = illums;
+    illuminantExporterResponse.prims = newPrims;
+
+    return illuminantExporterResponse;
 }
