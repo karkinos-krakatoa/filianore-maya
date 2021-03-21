@@ -1,7 +1,7 @@
 #include "materialprocessor.h"
 #include "util.h"
 
-#include "lambertnode.h"
+#include "matteshadernode.h"
 #include "mirrormaterialnode.h"
 
 #include <maya/MObjectArray.h>
@@ -10,6 +10,7 @@
 #include <maya/MPlug.h>
 
 #include "filianore/textures/constant.h"
+
 #include "filianore/materials/lambert.h"
 #include "filianore/materials/mirror.h"
 
@@ -41,9 +42,9 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
     }
 
     std::string materialName = mShaderName.asChar();
-    if (materialName.find("flLambertShader") != std::string::npos)
+    if (materialName.find("flMatteShader") != std::string::npos)
     {
-        MPlug mDiffuseColorPlug(mShaderObject, LambertNode::aDiffuseColor);
+        MPlug mDiffuseColorPlug(mShaderObject, MatteShaderNode::aColor);
         MFloatVector mDiffuseColor = mDiffuseColorPlug.asMDataHandle().asFloatVector();
 
         PrincipalSpectrum diffuseColor = FromReflectanceRGB(StaticArray<float, 3>(mDiffuseColor.x, mDiffuseColor.y, mDiffuseColor.z));

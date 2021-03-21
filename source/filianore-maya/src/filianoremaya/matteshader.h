@@ -1,14 +1,14 @@
-#ifndef _LAMBERT_SHADER
-#define _LAMBERT_SHADER
+#ifndef _MATTE_SHADER
+#define _MATTE_SHADER
 
 #include <maya/MPxSurfaceShadingNodeOverride.h>
 
-class LambertShader : public MHWRender::MPxSurfaceShadingNodeOverride
+class MatteShader : public MHWRender::MPxSurfaceShadingNodeOverride
 {
 public:
     static MHWRender::MPxSurfaceShadingNodeOverride *creator(const MObject &obj);
 
-    ~LambertShader() override;
+    ~MatteShader() override;
 
     MHWRender::DrawAPI supportedDrawAPIs() const override;
 
@@ -19,7 +19,7 @@ public:
     MString bumpAttribute() const override;
 
 private:
-    LambertShader(const MObject &obj);
+    MatteShader(const MObject &obj);
 };
 
 #endif

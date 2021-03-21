@@ -1,91 +1,111 @@
-#include "mirrormaterialnode.h"
+#include "matteshadernode.h"
 
-#include <maya/MFloatVector.h>
-#include <maya/MFnNumericAttribute.h>
 #include <maya/MFnStringData.h>
 #include <maya/MFnTypedAttribute.h>
+#include <maya/MFnNumericAttribute.h>
 #include <maya/MFnLightDataAttribute.h>
+#include <maya/MFloatVector.h>
+#include <maya/MFnCompoundAttribute.h>
 
-const MString MirrorMaterialNode::name("flMirrorShader");
-const MTypeId MirrorMaterialNode::id(0x00132b43);
+const MString MatteShaderNode::name("flMatteShader");
+const MTypeId MatteShaderNode::id(0x00132b44);
 
-MObject MirrorMaterialNode::nameData;
-MObject MirrorMaterialNode::nameAttr;
+MObject MatteShaderNode::aColorR;
+MObject MatteShaderNode::aColorG;
+MObject MatteShaderNode::aColorB;
+MObject MatteShaderNode::aColor;
+MObject MatteShaderNode::aWeight;
+MObject MatteShaderNode::aRoughness;
 
-MObject MirrorMaterialNode::aColor;
-MObject MirrorMaterialNode::aColorR;
-MObject MirrorMaterialNode::aColorG;
-MObject MirrorMaterialNode::aColorB;
-MObject MirrorMaterialNode::aOutColor;
-MObject MirrorMaterialNode::aOutColorR;
-MObject MirrorMaterialNode::aOutColorG;
-MObject MirrorMaterialNode::aOutColorB;
+MObject MatteShaderNode::aOutColorR;
+MObject MatteShaderNode::aOutColorG;
+MObject MatteShaderNode::aOutColorB;
+MObject MatteShaderNode::aOutColor;
 
-MObject MirrorMaterialNode::aNormalCamera;
-MObject MirrorMaterialNode::aNormalCameraX;
-MObject MirrorMaterialNode::aNormalCameraY;
-MObject MirrorMaterialNode::aNormalCameraZ;
-MObject MirrorMaterialNode::aLightData;
-MObject MirrorMaterialNode::aLightDirection;
-MObject MirrorMaterialNode::aLightDirectionX;
-MObject MirrorMaterialNode::aLightDirectionY;
-MObject MirrorMaterialNode::aLightDirectionZ;
-MObject MirrorMaterialNode::aLightIntensity;
-MObject MirrorMaterialNode::aLightIntensityR;
-MObject MirrorMaterialNode::aLightIntensityG;
-MObject MirrorMaterialNode::aLightIntensityB;
-MObject MirrorMaterialNode::aLightAmbient;
-MObject MirrorMaterialNode::aLightDiffuse;
-MObject MirrorMaterialNode::aLightSpecular;
-MObject MirrorMaterialNode::aLightShadowFraction;
-MObject MirrorMaterialNode::aPreShadowIntensity;
-MObject MirrorMaterialNode::aLightBlindData;
+MObject MatteShaderNode::aNormalCameraX;
+MObject MatteShaderNode::aNormalCameraY;
+MObject MatteShaderNode::aNormalCameraZ;
+MObject MatteShaderNode::aNormalCamera;
 
-void *MirrorMaterialNode::creator()
+MObject MatteShaderNode::aLightDirectionX;
+MObject MatteShaderNode::aLightDirectionY;
+MObject MatteShaderNode::aLightDirectionZ;
+MObject MatteShaderNode::aLightDirection;
+MObject MatteShaderNode::aLightIntensityR;
+MObject MatteShaderNode::aLightIntensityG;
+MObject MatteShaderNode::aLightIntensityB;
+MObject MatteShaderNode::aLightIntensity;
+MObject MatteShaderNode::aLightAmbient;
+MObject MatteShaderNode::aLightDiffuse;
+MObject MatteShaderNode::aLightSpecular;
+MObject MatteShaderNode::aLightShadowFraction;
+MObject MatteShaderNode::aPreShadowIntensity;
+MObject MatteShaderNode::aLightBlindData;
+MObject MatteShaderNode::aLightData;
+
+MatteShaderNode::MatteShaderNode()
 {
-    return (new MirrorMaterialNode);
 }
 
-MStatus MirrorMaterialNode::initialize()
+MatteShaderNode::~MatteShaderNode()
+{
+}
+
+void *MatteShaderNode::creator()
+{
+    return new MatteShaderNode();
+}
+
+MStatus MatteShaderNode::initialize()
 {
     MStatus status;
+
     MFnNumericAttribute numAttr;
-    MFnLightDataAttribute lAttr;
     MFnTypedAttribute typedAttr;
+    MFnLightDataAttribute lightAttr;
 
     MFnStringData strData;
     MObject nameData = strData.create();
     strData.set(name);
-    nameAttr = typedAttr.create("materialName", "mn", MFnData::kString, nameData, &status);
+    MObject nameAttr = typedAttr.create("materialName", "mn", MFnData::kString, nameData, &status);
     CHECK_MSTATUS(typedAttr.setWritable(false));
 
-    // Main Specular Color
-    aColorR = numAttr.create("aColorR", "rcr", MFnNumericData::kFloat, 0, &status);
+    // Diffuse Color
+    aColorR = numAttr.create("colorR", "mcr", MFnNumericData::kFloat, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setKeyable(true));
-    CHECK_MSTATUS(numAttr.setStorable(true));
-    CHECK_MSTATUS(numAttr.setDefault(1.f));
-
-    aColorG = numAttr.create("aColorG", "rcg", MFnNumericData::kFloat, 0, &status);
+    CHECK_MSTATUS(numAttr.setDefault(0.5));
+    aColorG = numAttr.create("colorG", "mcg", MFnNumericData::kFloat, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setKeyable(true));
-    CHECK_MSTATUS(numAttr.setStorable(true));
-    CHECK_MSTATUS(numAttr.setDefault(1.f));
-
-    aColorB = numAttr.create("aColorB", "rcb", MFnNumericData::kFloat, 0, &status);
+    CHECK_MSTATUS(numAttr.setDefault(0.5));
+    aColorB = numAttr.create("colorB", "mcb", MFnNumericData::kFloat, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setKeyable(true));
-    CHECK_MSTATUS(numAttr.setStorable(true));
-    CHECK_MSTATUS(numAttr.setDefault(1.f));
-
-    aColor = numAttr.create("aColor", "rc", aColorR, aColorG, aColorB, &status);
+    CHECK_MSTATUS(numAttr.setDefault(0.5));
+    aColor = numAttr.create("color", "mc", aColorR, aColorG, aColorB, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setKeyable(true));
-    CHECK_MSTATUS(numAttr.setStorable(true));
-    CHECK_MSTATUS(numAttr.setDefault(1.f, 1.f, 1.f));
+    CHECK_MSTATUS(numAttr.setDefault(0.5, 0.5, 0.5));
     CHECK_MSTATUS(numAttr.setUsedAsColor(true));
 
-    // Out color
+    // Weight
+    aWeight = numAttr.create("weight", "mw", MFnNumericData::kFloat, 0, &status);
+    CHECK_MSTATUS(status);
+    CHECK_MSTATUS(numAttr.setKeyable(true));
+    CHECK_MSTATUS(numAttr.setDefault(0.85));
+    CHECK_MSTATUS(numAttr.setMin(0));
+    CHECK_MSTATUS(numAttr.setMax(1));
+
+    // Roughness
+    aRoughness = numAttr.create("roughness", "mrr", MFnNumericData::kFloat, 0, &status);
+    CHECK_MSTATUS(status);
+    CHECK_MSTATUS(numAttr.setKeyable(true));
+    CHECK_MSTATUS(numAttr.setDefault(0));
+    CHECK_MSTATUS(numAttr.setMin(0));
+    CHECK_MSTATUS(numAttr.setMax(1));
+
+    // Final Output Color
     aOutColorR = numAttr.create("outColorR", "ocr", MFnNumericData::kFloat, 0, &status);
     CHECK_MSTATUS(status);
     aOutColorG = numAttr.create("outColorG", "ocg", MFnNumericData::kFloat, 0, &status);
@@ -103,17 +123,14 @@ MStatus MirrorMaterialNode::initialize()
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
     CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
     aNormalCameraY = numAttr.create("normalCameraY", "ny", MFnNumericData::kFloat, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
     CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
     aNormalCameraZ = numAttr.create("normalCameraZ", "nz", MFnNumericData::kFloat, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
     CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
     aNormalCamera = numAttr.create("normalCamera", "n", aNormalCameraX, aNormalCameraY, aNormalCameraZ, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
@@ -128,7 +145,6 @@ MStatus MirrorMaterialNode::initialize()
     CHECK_MSTATUS(numAttr.setReadable(true));
     CHECK_MSTATUS(numAttr.setWritable(false));
     CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
     aLightDirectionY = numAttr.create("lightDirectionY", "ldy", MFnNumericData::kFloat, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
@@ -136,7 +152,6 @@ MStatus MirrorMaterialNode::initialize()
     CHECK_MSTATUS(numAttr.setReadable(true));
     CHECK_MSTATUS(numAttr.setWritable(false));
     CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
     aLightDirectionZ = numAttr.create("lightDirectionZ", "ldz", MFnNumericData::kFloat, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
@@ -144,7 +159,6 @@ MStatus MirrorMaterialNode::initialize()
     CHECK_MSTATUS(numAttr.setReadable(true));
     CHECK_MSTATUS(numAttr.setWritable(false));
     CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
     aLightDirection = numAttr.create("lightDirection", "ld", aLightDirectionX, aLightDirectionY, aLightDirectionZ, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
@@ -161,7 +175,6 @@ MStatus MirrorMaterialNode::initialize()
     CHECK_MSTATUS(numAttr.setReadable(true));
     CHECK_MSTATUS(numAttr.setWritable(false));
     CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
     aLightIntensityG = numAttr.create("lightIntensityG", "lig", MFnNumericData::kFloat, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
@@ -169,7 +182,6 @@ MStatus MirrorMaterialNode::initialize()
     CHECK_MSTATUS(numAttr.setReadable(true));
     CHECK_MSTATUS(numAttr.setWritable(false));
     CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
     aLightIntensityB = numAttr.create("lightIntensityB", "lib", MFnNumericData::kFloat, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
@@ -177,7 +189,6 @@ MStatus MirrorMaterialNode::initialize()
     CHECK_MSTATUS(numAttr.setReadable(true));
     CHECK_MSTATUS(numAttr.setWritable(false));
     CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
     aLightIntensity = numAttr.create("lightIntensity", "li", aLightIntensityR, aLightIntensityG, aLightIntensityB, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
@@ -194,7 +205,6 @@ MStatus MirrorMaterialNode::initialize()
     CHECK_MSTATUS(numAttr.setReadable(true));
     CHECK_MSTATUS(numAttr.setWritable(false));
     CHECK_MSTATUS(numAttr.setDefault(true));
-
     aLightDiffuse = numAttr.create("lightDiffuse", "ldf", MFnNumericData::kBoolean, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
@@ -202,7 +212,6 @@ MStatus MirrorMaterialNode::initialize()
     CHECK_MSTATUS(numAttr.setReadable(true));
     CHECK_MSTATUS(numAttr.setWritable(false));
     CHECK_MSTATUS(numAttr.setDefault(true));
-
     aLightSpecular = numAttr.create("lightSpecular", "ls", MFnNumericData::kBoolean, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
@@ -210,7 +219,6 @@ MStatus MirrorMaterialNode::initialize()
     CHECK_MSTATUS(numAttr.setReadable(true));
     CHECK_MSTATUS(numAttr.setWritable(false));
     CHECK_MSTATUS(numAttr.setDefault(false));
-
     aLightShadowFraction = numAttr.create("lightShadowFraction", "lsf", MFnNumericData::kFloat, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
@@ -218,7 +226,6 @@ MStatus MirrorMaterialNode::initialize()
     CHECK_MSTATUS(numAttr.setReadable(true));
     CHECK_MSTATUS(numAttr.setWritable(false));
     CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
     aPreShadowIntensity = numAttr.create("preShadowIntensity", "psi", MFnNumericData::kFloat, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
@@ -226,35 +233,42 @@ MStatus MirrorMaterialNode::initialize()
     CHECK_MSTATUS(numAttr.setReadable(true));
     CHECK_MSTATUS(numAttr.setWritable(false));
     CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
     aLightBlindData = numAttr.createAddr("lightBlindData", "lbld", &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
     CHECK_MSTATUS(numAttr.setHidden(true));
     CHECK_MSTATUS(numAttr.setReadable(true));
     CHECK_MSTATUS(numAttr.setWritable(false));
-
-    aLightData = lAttr.create("lightDataArray", "ltd", aLightDirection,
-                              aLightIntensity, aLightAmbient, aLightDiffuse, aLightSpecular,
-                              aLightShadowFraction, aPreShadowIntensity, aLightBlindData,
-                              &status);
+    aLightData = lightAttr.create("lightDataArray", "ltd", aLightDirection, aLightIntensity, aLightAmbient, aLightDiffuse, aLightSpecular,
+                                  aLightShadowFraction, aPreShadowIntensity, aLightBlindData, &status);
     CHECK_MSTATUS(status);
-    CHECK_MSTATUS(lAttr.setArray(true));
-    CHECK_MSTATUS(lAttr.setStorable(false));
-    CHECK_MSTATUS(lAttr.setHidden(true));
-    CHECK_MSTATUS(lAttr.setDefault(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                                   true, true, false, 1.0f, 1.0f, NULL));
+    CHECK_MSTATUS(lightAttr.setArray(true));
+    CHECK_MSTATUS(lightAttr.setStorable(false));
+    CHECK_MSTATUS(lightAttr.setHidden(true));
+    CHECK_MSTATUS(lightAttr.setDefault(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, true, true, false, 1.0f, 1.0f, NULL));
 
+    // Set Attributes
     CHECK_MSTATUS(addAttribute(nameAttr));
     CHECK_MSTATUS(addAttribute(aColor));
+    CHECK_MSTATUS(addAttribute(aWeight));
+    CHECK_MSTATUS(addAttribute(aRoughness));
     CHECK_MSTATUS(addAttribute(aOutColor));
+
     CHECK_MSTATUS(addAttribute(aNormalCamera));
+
     CHECK_MSTATUS(addAttribute(aLightData));
 
+    // Attribute Affects
     CHECK_MSTATUS(attributeAffects(aColorR, aOutColor));
     CHECK_MSTATUS(attributeAffects(aColorG, aOutColor));
     CHECK_MSTATUS(attributeAffects(aColorB, aOutColor));
     CHECK_MSTATUS(attributeAffects(aColor, aOutColor));
+    CHECK_MSTATUS(attributeAffects(aRoughness, aOutColor));
+    CHECK_MSTATUS(attributeAffects(aWeight, aOutColor));
+    CHECK_MSTATUS(attributeAffects(aLightIntensityR, aOutColor));
+    CHECK_MSTATUS(attributeAffects(aLightIntensityB, aOutColor));
+    CHECK_MSTATUS(attributeAffects(aLightIntensityG, aOutColor));
+    CHECK_MSTATUS(attributeAffects(aLightIntensity, aOutColor));
     CHECK_MSTATUS(attributeAffects(aNormalCameraX, aOutColor));
     CHECK_MSTATUS(attributeAffects(aNormalCameraY, aOutColor));
     CHECK_MSTATUS(attributeAffects(aNormalCameraZ, aOutColor));
@@ -274,87 +288,83 @@ MStatus MirrorMaterialNode::initialize()
     return (MS::kSuccess);
 }
 
-MStatus MirrorMaterialNode::compute(const MPlug &plug, MDataBlock &block)
+MStatus MatteShaderNode::compute(const MPlug &plug, MDataBlock &block)
 {
-    MStatus status;
-    MFloatVector resultColor(0.0, 0.0, 0.0);
-
-    MFloatVector &surfaceColor = block.inputValue(aColor, &status).asFloatVector();
-    CHECK_MSTATUS(status);
-
-    MFloatVector &surfaceNormal = block.inputValue(aNormalCamera, &status).asFloatVector();
-    CHECK_MSTATUS(status);
-
-    CHECK_MSTATUS(status);
-
-    resultColor = surfaceColor;
-
-    // start
-    MArrayDataHandle lightData = block.inputArrayValue(aLightData, &status);
-    CHECK_MSTATUS(status);
-
-    int numLights = lightData.elementCount(&status);
-    CHECK_MSTATUS(status);
-
-    // Calculate the effect of the lights in the scene on the color
-    //
-
-    // Iterate through light list and get ambient/diffuse values
-    //
-    for (int count = 1; count <= numLights; count++)
+    if (plug == aOutColorR || plug == aOutColorG || plug == aOutColorB || plug == aOutColor)
     {
-        // Get the current light out of the array
-        //
-        MDataHandle currentLight = lightData.inputValue(&status);
+        MStatus status;
+        MFloatVector resultColor(0.0, 0.0, 0.0);
+
+        // Get Shading Params from input block
+        MFloatVector &surfaceNormal = block.inputValue(aNormalCamera, &status).asFloatVector();
+        CHECK_MSTATUS(status);
+        MFloatVector &surfaceColor = block.inputValue(aColor, &status).asFloatVector();
+        CHECK_MSTATUS(status);
+        float &surfaceColorWeight = block.inputValue(aWeight, &status).asFloat();
         CHECK_MSTATUS(status);
 
-        // Get the intensity of that light
-        //
-        MFloatVector &lightIntensity = currentLight.child(aLightIntensity).asFloatVector();
+        resultColor = surfaceColor;
 
-        // Find ambient component
-        //
-        if (currentLight.child(aLightAmbient).asBool())
+        // Get light list
+        MArrayDataHandle lightData = block.inputArrayValue(aLightData, &status);
+        CHECK_MSTATUS(status);
+        int numLights = lightData.elementCount(&status);
+        CHECK_MSTATUS(status);
+
+        for (int count = 1; count <= numLights; count++)
         {
-            resultColor += lightIntensity;
-        }
+            MDataHandle currentLight = lightData.inputValue(&status);
+            CHECK_MSTATUS(status);
 
-        // Find diffuse component
-        //
-        if (currentLight.child(aLightDiffuse).asBool())
-        {
-            MFloatVector &lightDirection = currentLight.child(aLightDirection).asFloatVector();
-            float cosln = lightDirection * surfaceNormal;
+            MFloatVector &lightIntensity = currentLight.child(aLightIntensity).asFloatVector();
 
-            if (cosln > 0.0f)
+            // Find ambient component
+            if (currentLight.child(aLightAmbient).asBool())
             {
-                resultColor += lightIntensity * (cosln * 60.f);
+                resultColor += lightIntensity;
+            }
+
+            // Find diffuse component
+            if (currentLight.child(aLightDiffuse).asBool())
+            {
+                MFloatVector &lightDirection = currentLight.child(aLightDirection).asFloatVector();
+                float cosln = lightDirection * surfaceNormal;
+
+                if (cosln > 0.0f)
+                {
+                    resultColor += lightIntensity * cosln;
+                }
+            }
+
+            // Advance to the next light.
+            if (count < numLights)
+            {
+                status = lightData.next();
+                CHECK_MSTATUS(status);
             }
         }
 
-        // Advance to the next light.
-        //
-        if (count < numLights)
+        // Factor incident light with surface color
+        resultColor[0] = resultColor[0] * surfaceColor[0] * surfaceColorWeight;
+        resultColor[1] = resultColor[1] * surfaceColor[1] * surfaceColorWeight;
+        resultColor[2] = resultColor[2] * surfaceColor[2] * surfaceColorWeight;
+
+        // Set ouput color attribute
+        if (plug == aOutColorR || plug == aOutColorG || plug == aOutColorB || plug == aOutColor)
         {
-            status = lightData.next();
+            // Get the handle to the attribute
+            MDataHandle outColorHandle = block.outputValue(aOutColor, &status);
             CHECK_MSTATUS(status);
+            MFloatVector &outColor = outColorHandle.asFloatVector();
+
+            outColor = resultColor;
+            outColorHandle.setClean();
         }
     }
-
-    // Factor incident light with surface color and add incandescence
-    //
-    resultColor[0] = resultColor[0] * surfaceColor[0];
-    resultColor[1] = resultColor[1] * surfaceColor[1];
-    resultColor[2] = resultColor[2] * surfaceColor[2];
-
-    if (plug == aOutColor || plug == aOutColorR || plug == aOutColorG || plug == aOutColorB)
+    else
     {
-        MDataHandle outColorHandle = block.outputValue(aOutColor, &status);
-        CHECK_MSTATUS(status);
-        MFloatVector &outColor = outColorHandle.asFloatVector();
-
-        outColor = resultColor;
-        outColorHandle.setClean();
+        return (MS::kUnknownParameter); // We got an unexpected plug
     }
+
     return (MS::kSuccess);
 }

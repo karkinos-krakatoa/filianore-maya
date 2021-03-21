@@ -1,10 +1,11 @@
 #include <maya/MFnPlugin.h>
 #include <maya/MDrawRegistry.h>
 
-#include "lambertnode.h"
-#include "lambertshader.h"
 #include "mirrormaterialnode.h"
 #include "mirrorshader.h"
+
+#include "matteshadernode.h"
+#include "matteshader.h"
 
 #include "renderglobalsnode.h"
 #include "finalrendercommand.h"
@@ -27,10 +28,10 @@ MStatus initializePlugin(MObject plugin)
 	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Error registering RenderGlobalNode.");
 
 	// Shading Nodes
-	MString sDrawLambertDBClassification("drawdb/shader/surface/" + LambertNode::name);
-	MString sLambertFullClassification("shader/surface:" + sDrawLambertDBClassification);
-	fnPlugin.registerNode(LambertNode::name, LambertNode::id, LambertNode::creator, LambertNode::initialize, MPxNode::kDependNode, &sLambertFullClassification);
-	MHWRender::MDrawRegistry::registerSurfaceShadingNodeOverrideCreator(sDrawLambertDBClassification, LambertNode::name, LambertShader::creator);
+	MString sDrawMatteDBClassification("drawdb/shader/surface/" + MatteShaderNode::name);
+	MString sMatteFullClassification("shader/surface:" + sDrawMatteDBClassification);
+	fnPlugin.registerNode(MatteShaderNode::name, MatteShaderNode::id, MatteShaderNode::creator, MatteShaderNode::initialize, MPxNode::kDependNode, &sMatteFullClassification);
+	MHWRender::MDrawRegistry::registerSurfaceShadingNodeOverrideCreator(sDrawMatteDBClassification, MatteShaderNode::name, MatteShader::creator);
 
 	MString sDrawMirrorMaterialDBClassification("drawdb/shader/surface/" + MirrorMaterialNode::name);
 	MString sMirrorMaterialFullClassification("shader/surface:" + sDrawMirrorMaterialDBClassification);
@@ -61,9 +62,9 @@ MStatus uninitializePlugin(MObject plugin)
 	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Error deregistering RenderGlobalNode.");
 
 	// Shading Nodes
-	MString sDrawLambertDBClassification("drawdb/shader/surface/" + LambertNode::name);
-	fnPlugin.deregisterNode(LambertNode::id);
-	MHWRender::MDrawRegistry::deregisterSurfaceShadingNodeOverrideCreator(sDrawLambertDBClassification, LambertNode::name);
+	MString sDrawMatteDBClassification("drawdb/shader/surface/" + MatteShaderNode::name);
+	fnPlugin.deregisterNode(MatteShaderNode::id);
+	MHWRender::MDrawRegistry::deregisterSurfaceShadingNodeOverrideCreator(sDrawMatteDBClassification, MatteShaderNode::name);
 
 	MString sDrawMirrorMaterialDBClassification("drawdb/shader/surface/" + MirrorMaterialNode::name);
 	fnPlugin.deregisterNode(MirrorMaterialNode::id);
