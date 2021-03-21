@@ -13,6 +13,7 @@
 
 #include "filianore/materials/lambert.h"
 #include "filianore/materials/mirror.h"
+#include "filianore/materials/matte.h"
 
 #include "filianore/color/spectrumoperations.h"
 #include "filianore/color/spectruminits.h"
@@ -47,11 +48,19 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
         MPlug mDiffuseColorPlug(mShaderObject, MatteShaderNode::aColor);
         MFloatVector mDiffuseColor = mDiffuseColorPlug.asMDataHandle().asFloatVector();
 
-        PrincipalSpectrum diffuseColor = FromReflectanceRGB(StaticArray<float, 3>(mDiffuseColor.x, mDiffuseColor.y, mDiffuseColor.z));
-        std::shared_ptr<Texture<PrincipalSpectrum>> diffuseTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(diffuseColor);
-        std::shared_ptr<Material> lambertMaterial = std::make_shared<LambertMaterial>(diffuseTex);
+        MPlug mDiffuseWeightPlug(mShaderObject, MatteShaderNode::aWeight);
+        float mDiffuseWeight = mDiffuseWeightPlug.asMDataHandle().asFloat();
 
-        return lambertMaterial;
+        MPlug mDiffuseRoughnessPlug(mShaderObject, MatteShaderNode::aRoughness);
+        float mDiffuseRoughness = mDiffuseRoughnessPlug.asMDataHandle().asFloat();
+
+        PrincipalSpectrum diffuseColor = FromReflectanceRGB(StaticArray<float, 3>(mDiffuseColor.x, mDiffuseColor.y, mDiffuseColor.z));
+        std::shared_ptr<Texture<PrincipalSpectrum>> diffuseColorTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(diffuseColor);
+        std::shared_ptr<Texture<float>> diffuseRoughnessTex = std::make_shared<ConstantTexture<float>>(mDiffuseRoughness);
+
+        std::shared_ptr<Material> matteMaterial = std::make_shared<MatteMaterial>(diffuseColorTex, diffuseRoughnessTex, mDiffuseWeight);
+
+        return matteMaterial;
     }
 
     if (materialName.find("flMirrorShader") != std::string::npos)
