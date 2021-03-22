@@ -2,7 +2,7 @@
 
 MHWRender::MPxSurfaceShadingNodeOverride *MatteShader::creator(const MObject &obj)
 {
-    return (new MatteShader(obj));
+    return new MatteShader(obj);
 }
 
 MatteShader::MatteShader(const MObject &obj)
@@ -21,7 +21,7 @@ MHWRender::DrawAPI MatteShader::supportedDrawAPIs() const
 
 MString MatteShader::fragmentName() const
 {
-    return ("mayaLambertSurface");
+    return "mayaLambertSurface";
 }
 
 void MatteShader::getCustomMappings(MHWRender::MAttributeParameterMappingList &mappings)

@@ -7,7 +7,7 @@ class MatteShaderNode : public MPxNode
 {
 public:
     MatteShaderNode();
-    ~MatteShaderNode();
+    ~MatteShaderNode() override;
 
     static const MString name;
     static const MTypeId id;
