@@ -56,8 +56,6 @@ set(SOURCE_FILES
   src/filianoremaya/renderglobalsnode.cpp
   src/filianoremaya/matteshadernode.cpp
   src/filianoremaya/matteShader.cpp
-  src/filianoremaya/mirrormaterialnode.cpp
-  src/filianoremaya/mirrorshader.cpp
   src/filianoremaya/materialprocessor.cpp
   src/filianoremaya/finalrendercommand.cpp
   src/filianoremaya/pluginmain.cpp)

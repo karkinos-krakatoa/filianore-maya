@@ -2,7 +2,6 @@
 #include "util.h"
 
 #include "matteshadernode.h"
-#include "mirrormaterialnode.h"
 
 #include <maya/MObjectArray.h>
 #include <maya/MIntArray.h>
@@ -12,7 +11,6 @@
 #include "filianore/textures/constant.h"
 
 #include "filianore/materials/lambert.h"
-#include "filianore/materials/mirror.h"
 #include "filianore/materials/matte.h"
 
 #include "filianore/color/spectrumoperations.h"
@@ -63,17 +61,17 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
         return matteMaterial;
     }
 
-    if (materialName.find("flMirrorShader") != std::string::npos)
-    {
-        MPlug mColorPlug(mShaderObject, MirrorMaterialNode::aColor);
-        MFloatVector mColor = mColorPlug.asMDataHandle().asFloatVector();
+    // if (materialName.find("flMirrorShader") != std::string::npos)
+    // {
+    //     MPlug mColorPlug(mShaderObject, MirrorMaterialNode::aColor);
+    //     MFloatVector mColor = mColorPlug.asMDataHandle().asFloatVector();
 
-        PrincipalSpectrum specularColor = FromReflectanceRGB(StaticArray<float, 3>(mColor.x, mColor.y, mColor.z));
-        std::shared_ptr<Texture<PrincipalSpectrum>> specularTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(specularColor);
-        std::shared_ptr<Material> mirrorMaterial = std::make_shared<MirrorMaterial>(specularTex);
+    //     PrincipalSpectrum specularColor = FromReflectanceRGB(StaticArray<float, 3>(mColor.x, mColor.y, mColor.z));
+    //     std::shared_ptr<Texture<PrincipalSpectrum>> specularTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(specularColor);
+    //     std::shared_ptr<Material> mirrorMaterial = std::make_shared<MirrorMaterial>(specularTex);
 
-        return mirrorMaterial;
-    }
+    //     return mirrorMaterial;
+    // }
 
     return defaultMaterial;
 }

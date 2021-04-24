@@ -1,9 +1,6 @@
 #include <maya/MFnPlugin.h>
 #include <maya/MDrawRegistry.h>
 
-#include "mirrormaterialnode.h"
-#include "mirrorshader.h"
-
 #include "matteshadernode.h"
 #include "matteshader.h"
 
@@ -33,11 +30,6 @@ MStatus initializePlugin(MObject plugin)
 	fnPlugin.registerNode(MatteShaderNode::name, MatteShaderNode::id, MatteShaderNode::creator, MatteShaderNode::initialize, MPxNode::kDependNode, &sMatteFullClassification);
 	MHWRender::MDrawRegistry::registerSurfaceShadingNodeOverrideCreator(sDrawMatteDBClassification, MatteShaderNode::name, MatteShader::creator);
 
-	MString sDrawMirrorMaterialDBClassification("drawdb/shader/surface/" + MirrorMaterialNode::name);
-	MString sMirrorMaterialFullClassification("shader/surface:" + sDrawMirrorMaterialDBClassification);
-	fnPlugin.registerNode(MirrorMaterialNode::name, MirrorMaterialNode::id, MirrorMaterialNode::creator, MirrorMaterialNode::initialize, MPxNode::kDependNode, &sMirrorMaterialFullClassification);
-	MHWRender::MDrawRegistry::registerSurfaceShadingNodeOverrideCreator(sDrawMirrorMaterialDBClassification, MirrorMaterialNode::name, MirrorShader::creator);
-
 	// Commands
 	status = fnPlugin.registerCommand(FinalRenderCommand::commandName, FinalRenderCommand::creator);
 	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Error registering Final Render command.");
@@ -65,10 +57,6 @@ MStatus uninitializePlugin(MObject plugin)
 	MString sDrawMatteDBClassification("drawdb/shader/surface/" + MatteShaderNode::name);
 	fnPlugin.deregisterNode(MatteShaderNode::id);
 	MHWRender::MDrawRegistry::deregisterSurfaceShadingNodeOverrideCreator(sDrawMatteDBClassification, MatteShaderNode::name);
-
-	MString sDrawMirrorMaterialDBClassification("drawdb/shader/surface/" + MirrorMaterialNode::name);
-	fnPlugin.deregisterNode(MirrorMaterialNode::id);
-	MHWRender::MDrawRegistry::deregisterSurfaceShadingNodeOverrideCreator(sDrawMirrorMaterialDBClassification, MirrorMaterialNode::name);
 
 	// Commands
 	status = fnPlugin.deregisterCommand(FinalRenderCommand::commandName);

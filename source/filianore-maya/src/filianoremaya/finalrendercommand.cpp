@@ -11,8 +11,10 @@
 #include <tbb/parallel_for.h>
 #include <tbb/task_scheduler_init.h>
 
-#include "filianore/color/rgb.h"
 #include "filianore/accel/bvh.h"
+#include "filianore/accel/fbvh.h"
+
+#include "filianore/color/rgb.h"
 #include "filianore/core/interaction.h"
 #include "filianore/core/scene.h"
 #include "filianore/samplers/whitenoise.h"
