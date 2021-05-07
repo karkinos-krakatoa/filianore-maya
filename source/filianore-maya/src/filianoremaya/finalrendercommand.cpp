@@ -12,7 +12,6 @@
 #include <tbb/task_scheduler_init.h>
 
 #include "filianore/accel/bvh.h"
-#include "filianore/accel/fbvh.h"
 
 #include "filianore/color/rgb.h"
 #include "filianore/core/interaction.h"
