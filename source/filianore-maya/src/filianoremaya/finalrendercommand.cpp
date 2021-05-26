@@ -13,6 +13,11 @@
 
 #include "filianore/accel/bvh.h"
 
+#include "filianore/bvhx/bvhx.h"
+#include "filianore/bvhx/binnedsahbuilder.h"
+#include "filianore/bvhx/raytraverser.h"
+#include "filianore/bvhx/primitiveintersectors.h"
+
 #include "filianore/color/rgb.h"
 #include "filianore/core/interaction.h"
 #include "filianore/core/scene.h"
@@ -127,11 +132,21 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
         std::cerr << e.what() << '\n';
     }
 
+    // New Accel
+    Bvh bvhx;
+    BinnedSahBuilder builder(bvhx);
+    auto [bboxes, centroids] = ComputeBoundingBoxesAndCenters(scenePrimitives, scenePrimitives.size());
+    auto globalBbox = ComputeGlobalBounds(bboxes.get(), scenePrimitives.size());
+    builder.ExecuteBuild(globalBbox, bboxes.get(), centroids.get(), scenePrimitives.size());
+
+    std::shared_ptr<PrimitiveIntersector> primitiveIntersector = std::make_shared<PrimitiveIntersector>(bvhx, scenePrimitives, false);
+    std::shared_ptr<RayTraverser> rayTraverser = std::make_shared<RayTraverser>(bvhx);
+
     // Accel Setup
-    std::shared_ptr<Primitive> bvh = std::make_shared<BVH>(scenePrimitives);
+    //std::shared_ptr<Primitive> bvh = std::make_shared<BVH>(scenePrimitives);
 
     // Render components setup
-    Scene scene(bvh, illums);
+    Scene scene(rayTraverser, primitiveIntersector, illums);
     std::shared_ptr<Sampler> sampler = std::make_shared<Whitenoise>();
     std::unique_ptr<Integrator> integrator = std::make_unique<PathIntegrator>(renderParams);
     integrator->PrepareTheRenderer(scene, *sampler);
@@ -145,23 +160,23 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
     for (float s = 0; s < renderParams.samples; s++)
     {
         tbb::parallel_for(tbb::blocked_range<int>(0, renderSettings.height),
-                          [renderSettings, &renderParams, &s, &camera, &scene, &sampler, &integrator, pixels](const tbb::blocked_range<int> &range) {
+                          [renderSettings, &renderParams, &s, &camera, &rayTraverser, &primitiveIntersector, &scene, &sampler, &integrator, pixels](const tbb::blocked_range<int> &range)
+                          {
                               for (unsigned int y = range.begin(); y != (unsigned int)range.end(); y++)
                               {
                                   for (unsigned int x = 0; x < renderSettings.width; x++)
                                   {
                                       int pixelIndex = (renderSettings.height - y - 1) * renderSettings.width + x;
 
-                                      StaticArray<float, 2> uRand = sampler->Get2D();
-                                      float u = (static_cast<float>(x) + uRand.x()) / float(renderSettings.width);
-                                      float v = (static_cast<float>(y) + uRand.y()) / float(renderSettings.height);
+                                      StaticArray<float, 2> uCamera = sampler->Get2D();
+                                      float u = (static_cast<float>(x) + uCamera.x()) / float(renderSettings.width);
+                                      float v = (static_cast<float>(y) + uCamera.y()) / float(renderSettings.height);
 
+                                      StaticArray<float, 2> uLens = sampler->Get2D();
                                       Ray ray = camera->AwakenRay(StaticArray<float, 2>(u, v), StaticArray<float, 2>(0.332f, 0.55012f));
 
                                       PrincipalSpectrum currPixelSpec = integrator->Li(ray, scene, *sampler, 0);
-                                      StaticArray<float, 3> currPixel(0.f);
-
-                                      currPixel = ToRGB(currPixelSpec);
+                                      StaticArray<float, 3> currPixel = ToRGB(currPixelSpec);
                                       currPixel = ToneMap(currPixel, renderParams.tonemapType);
                                       currPixel = GammaCorrect(currPixel, renderParams.gammaCorrectType);
 
