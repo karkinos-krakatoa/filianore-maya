@@ -1,22 +1,18 @@
-#ifndef _MATTE_MAYA_SHADER_NODE
-#define _MATTE_MAYA_SHADER_NODE
+#ifndef _PLASTIC_MAYA_SHADER_NODE_H
+#define _PLASTIC_MAYA_SHADER_NODE_H
 
 #include <maya/MPxNode.h>
 
-class MatteShaderNode : public MPxNode
+class PlasticShaderNode : public MPxNode
 {
 public:
-    MatteShaderNode();
-    ~MatteShaderNode() override;
-
     static const MString name;
     static const MTypeId id;
-
-    virtual MStatus compute(const MPlug &plug, MDataBlock &block) override;
 
     static void *creator();
     static MStatus initialize();
 
+    MStatus compute(const MPlug &plug, MDataBlock &block) override;
     SchedulingType schedulingType() const override { return MPxNode::kParallel; }
 
     static MObject nameData;
@@ -26,34 +22,36 @@ public:
     static MObject aColorG;
     static MObject aColorB;
     static MObject aColor;
-    static MObject aWeight;
-    static MObject aRoughness;
 
     static MObject aOutColorR;
     static MObject aOutColorG;
     static MObject aOutColorB;
     static MObject aOutColor;
 
+    static MObject aOutTransparencyR;
+    static MObject aOutTransparencyG;
+    static MObject aOutTransparencyB;
+    static MObject aOutTransparency;
+
+    static MObject aNormalCamera;
     static MObject aNormalCameraX;
     static MObject aNormalCameraY;
     static MObject aNormalCameraZ;
-    static MObject aNormalCamera;
-
+    static MObject aLightData;
+    static MObject aLightDirection;
     static MObject aLightDirectionX;
     static MObject aLightDirectionY;
     static MObject aLightDirectionZ;
-    static MObject aLightDirection;
+    static MObject aLightIntensity;
     static MObject aLightIntensityR;
     static MObject aLightIntensityG;
     static MObject aLightIntensityB;
-    static MObject aLightIntensity;
     static MObject aLightAmbient;
     static MObject aLightDiffuse;
     static MObject aLightSpecular;
     static MObject aLightShadowFraction;
     static MObject aPreShadowIntensity;
     static MObject aLightBlindData;
-    static MObject aLightData;
 };
 
 #endif

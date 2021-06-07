@@ -8,7 +8,10 @@
 #include <maya/MFnCompoundAttribute.h>
 
 const MString MatteShaderNode::name("flMatteShader");
-const MTypeId MatteShaderNode::id(0x00132b44);
+const MTypeId MatteShaderNode::id(0x00132b42);
+
+MObject MatteShaderNode::nameData;
+MObject MatteShaderNode::nameAttr;
 
 MObject MatteShaderNode::aColorR;
 MObject MatteShaderNode::aColorG;
@@ -65,25 +68,25 @@ MStatus MatteShaderNode::initialize()
     MFnLightDataAttribute lightAttr;
 
     MFnStringData strData;
-    MObject nameData = strData.create();
+    nameData = strData.create();
     strData.set(name);
-    MObject nameAttr = typedAttr.create("materialName", "mn", MFnData::kString, nameData, &status);
+    nameAttr = typedAttr.create("materialName", "mn", MFnData::kString, nameData, &status);
     CHECK_MSTATUS(typedAttr.setWritable(false));
 
     // Diffuse Color
-    aColorR = numAttr.create("colorR", "mcr", MFnNumericData::kFloat, 0, &status);
+    aColorR = numAttr.create("dfcolorR", "mcr", MFnNumericData::kFloat, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setKeyable(true));
     CHECK_MSTATUS(numAttr.setDefault(0.5));
-    aColorG = numAttr.create("colorG", "mcg", MFnNumericData::kFloat, 0, &status);
+    aColorG = numAttr.create("dfcolorG", "mcg", MFnNumericData::kFloat, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setKeyable(true));
     CHECK_MSTATUS(numAttr.setDefault(0.5));
-    aColorB = numAttr.create("colorB", "mcb", MFnNumericData::kFloat, 0, &status);
+    aColorB = numAttr.create("dfcolorB", "mcb", MFnNumericData::kFloat, 0, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setKeyable(true));
     CHECK_MSTATUS(numAttr.setDefault(0.5));
-    aColor = numAttr.create("color", "mc", aColorR, aColorG, aColorB, &status);
+    aColor = numAttr.create("dfcolor", "mc", aColorR, aColorG, aColorB, &status);
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setKeyable(true));
     CHECK_MSTATUS(numAttr.setDefault(0.5, 0.5, 0.5));

@@ -1,14 +1,14 @@
-#ifndef _MATTE_MAYA_SHADER_H
-#define _MATTE_MAYA_SHADER_H
+#ifndef _MIRROR_SHADER_H
+#define _MIRROR_SHADER_H
 
 #include <maya/MPxSurfaceShadingNodeOverride.h>
 
-class MatteShader : public MHWRender::MPxSurfaceShadingNodeOverride
+class PlasticShader : public MHWRender::MPxSurfaceShadingNodeOverride
 {
 public:
     static MHWRender::MPxSurfaceShadingNodeOverride *creator(const MObject &obj);
 
-    ~MatteShader() override;
+    ~PlasticShader() override;
 
     MHWRender::DrawAPI supportedDrawAPIs() const override;
 
@@ -19,7 +19,7 @@ public:
     MString bumpAttribute() const override;
 
 private:
-    MatteShader(const MObject &obj);
+    PlasticShader(const MObject &obj);
 };
 
 #endif

@@ -4,6 +4,9 @@
 #include "matteshadernode.h"
 #include "matteshader.h"
 
+#include "plasticshadernode.h"
+#include "plasticshader.h"
+
 #include "renderglobalsnode.h"
 #include "finalrendercommand.h"
 
@@ -29,6 +32,11 @@ MStatus initializePlugin(MObject plugin)
 	MString sMatteFullClassification("shader/surface:" + sDrawMatteDBClassification);
 	fnPlugin.registerNode(MatteShaderNode::name, MatteShaderNode::id, MatteShaderNode::creator, MatteShaderNode::initialize, MPxNode::kDependNode, &sMatteFullClassification);
 	MHWRender::MDrawRegistry::registerSurfaceShadingNodeOverrideCreator(sDrawMatteDBClassification, MatteShaderNode::name, MatteShader::creator);
+
+	MString sDrawPlasticShaderDBClassification("drawdb/shader/surface/" + PlasticShaderNode::name);
+	MString sPlasticShaderFullClassification("shader/surface:" + sDrawPlasticShaderDBClassification);
+	fnPlugin.registerNode(PlasticShaderNode::name, PlasticShaderNode::id, PlasticShaderNode::creator, PlasticShaderNode::initialize, MPxNode::kDependNode, &sPlasticShaderFullClassification);
+	MHWRender::MDrawRegistry::registerSurfaceShadingNodeOverrideCreator(sDrawPlasticShaderDBClassification, PlasticShaderNode::name, PlasticShader::creator);
 
 	// Commands
 	status = fnPlugin.registerCommand(FinalRenderCommand::commandName, FinalRenderCommand::creator);
@@ -57,6 +65,10 @@ MStatus uninitializePlugin(MObject plugin)
 	MString sDrawMatteDBClassification("drawdb/shader/surface/" + MatteShaderNode::name);
 	fnPlugin.deregisterNode(MatteShaderNode::id);
 	MHWRender::MDrawRegistry::deregisterSurfaceShadingNodeOverrideCreator(sDrawMatteDBClassification, MatteShaderNode::name);
+
+	MString sDrawPlasticShaderDBClassification("drawdb/shader/surface/" + PlasticShaderNode::name);
+	fnPlugin.deregisterNode(PlasticShaderNode::id);
+	MHWRender::MDrawRegistry::deregisterSurfaceShadingNodeOverrideCreator(sDrawPlasticShaderDBClassification, PlasticShaderNode::name);
 
 	// Commands
 	status = fnPlugin.deregisterCommand(FinalRenderCommand::commandName);

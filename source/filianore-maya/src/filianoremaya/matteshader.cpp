@@ -26,8 +26,7 @@ MString MatteShader::fragmentName() const
 
 void MatteShader::getCustomMappings(MHWRender::MAttributeParameterMappingList &mappings)
 {
-    MHWRender::MAttributeParameterMapping diffuseMapping(
-        "color", "outColor", true, true);
+    MHWRender::MAttributeParameterMapping diffuseMapping("color", "outColor", true, true);
     mappings.append(diffuseMapping);
 }
 

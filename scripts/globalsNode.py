@@ -143,6 +143,18 @@ class FilianoreRendererCommonTab(FilianoreRendererGenericTab):
                             fieldMaxValue=100,
                             attribute="filianoreRendererGlobalsNode.specularRayDepth")
 
+                        pm.separator(height=2)
+
+                        pm.attrFieldSliderGrp(
+                            label="Glossy:",
+                            columnWidth=(3, 160),
+                            columnAttach=(1, "right", 4),
+                            minValue=0,
+                            maxValue=100,
+                            fieldMinValue=0,
+                            fieldMaxValue=100,
+                            attribute="filianoreRendererGlobalsNode.glossyRayDepth")
+
                 with pm.frameLayout("colorMgtFrameLayout", label="Color Management", collapsable=True, collapse=False):
                     with pm.columnLayout("colorMgtColumnLayout", adjustableColumn=True, width=380,
                                          rowSpacing=2):
