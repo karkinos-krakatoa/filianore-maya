@@ -1,7 +1,7 @@
 #include "materialprocessor.h"
 #include "util.h"
 
-#include "matteshadernode.h"
+#include "flstandardsurfaceshader.h"
 #include "plasticshadernode.h"
 
 #include <maya/MObjectArray.h>
@@ -43,15 +43,15 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
     }
 
     std::string materialName = mShaderName.asChar();
-    if (materialName.find("flMatteShader") != std::string::npos)
+    if (materialName.find("flStandardSurface") != std::string::npos)
     {
-        MPlug mDiffuseColorPlug(mShaderObject, MatteShaderNode::aColor);
+        MPlug mDiffuseColorPlug(mShaderObject, FlStandardSurfaceShader::diffuseBaseColor);
         MFloatVector mDiffuseColor = mDiffuseColorPlug.asMDataHandle().asFloatVector();
 
-        MPlug mDiffuseWeightPlug(mShaderObject, MatteShaderNode::aWeight);
+        MPlug mDiffuseWeightPlug(mShaderObject, FlStandardSurfaceShader::diffuseBaseWeight);
         float mDiffuseWeight = mDiffuseWeightPlug.asMDataHandle().asFloat();
 
-        MPlug mDiffuseRoughnessPlug(mShaderObject, MatteShaderNode::aRoughness);
+        MPlug mDiffuseRoughnessPlug(mShaderObject, FlStandardSurfaceShader::diffuseBaseRoughness);
         float mDiffuseRoughness = mDiffuseRoughnessPlug.asMDataHandle().asFloat();
 
         PrincipalSpectrum diffuseColor = FromReflectanceRGB(StaticArray<float, 3>(mDiffuseColor.x, mDiffuseColor.y, mDiffuseColor.z));

@@ -1,13 +1,13 @@
-#ifndef _MATTE_MAYA_SHADER_NODE
-#define _MATTE_MAYA_SHADER_NODE
+#ifndef _FL_STANDARD_SURFACE_SHADER_H
+#define _FL_STANDARD_SURFACE_SHADER_H
 
 #include <maya/MPxNode.h>
 
-class MatteShaderNode : public MPxNode
+class FlStandardSurfaceShader : public MPxNode
 {
 public:
-    MatteShaderNode();
-    ~MatteShaderNode() override;
+    FlStandardSurfaceShader();
+    ~FlStandardSurfaceShader() override;
 
     static const MString name;
     static const MTypeId id;
@@ -22,12 +22,12 @@ public:
     static MObject nameData;
     static MObject nameAttr;
 
-    static MObject aColorR;
-    static MObject aColorG;
-    static MObject aColorB;
-    static MObject aColor;
-    static MObject aWeight;
-    static MObject aRoughness;
+    static MObject diffuseBaseColorR;
+    static MObject diffuseBaseColorG;
+    static MObject diffuseBaseColorB;
+    static MObject diffuseBaseColor;
+    static MObject diffuseBaseWeight;
+    static MObject diffuseBaseRoughness;
 
     static MObject aOutColorR;
     static MObject aOutColorG;

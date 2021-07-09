@@ -1,14 +1,14 @@
-#ifndef _MATTE_MAYA_SHADER_H
-#define _MATTE_MAYA_SHADER_H
+#ifndef _FL_STANDARD_SURFACE_SHADER_OVERRIDE_H
+#define _FL_STANDARD_SURFACE_SHADER_OVERRIDE_H
 
 #include <maya/MPxSurfaceShadingNodeOverride.h>
 
-class MatteShader : public MHWRender::MPxSurfaceShadingNodeOverride
+class FlStandardSurfaceShaderOverride : public MHWRender::MPxSurfaceShadingNodeOverride
 {
 public:
     static MHWRender::MPxSurfaceShadingNodeOverride *creator(const MObject &obj);
 
-    ~MatteShader() override;
+    ~FlStandardSurfaceShaderOverride() override;
 
     MHWRender::DrawAPI supportedDrawAPIs() const override;
 
@@ -19,7 +19,7 @@ public:
     MString bumpAttribute() const override;
 
 private:
-    MatteShader(const MObject &obj);
+    FlStandardSurfaceShaderOverride(const MObject &obj);
 };
 
 #endif

@@ -1,8 +1,8 @@
 #include <maya/MFnPlugin.h>
 #include <maya/MDrawRegistry.h>
 
-#include "matteshadernode.h"
-#include "matteshader.h"
+#include "flstandardsurfaceshaderoverride.h"
+#include "flstandardsurfaceshader.h"
 
 #include "plasticshadernode.h"
 #include "plasticshader.h"
@@ -28,10 +28,10 @@ MStatus initializePlugin(MObject plugin)
 	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Error registering RenderGlobalNode.");
 
 	// Shading Nodes
-	MString sDrawMatteDBClassification("drawdb/shader/surface/" + MatteShaderNode::name);
-	MString sMatteFullClassification("shader/surface:" + sDrawMatteDBClassification);
-	fnPlugin.registerNode(MatteShaderNode::name, MatteShaderNode::id, MatteShaderNode::creator, MatteShaderNode::initialize, MPxNode::kDependNode, &sMatteFullClassification);
-	MHWRender::MDrawRegistry::registerSurfaceShadingNodeOverrideCreator(sDrawMatteDBClassification, MatteShaderNode::name, MatteShader::creator);
+	MString sDrawFlStandardSurfaceDBClassification("drawdb/shader/surface/" + FlStandardSurfaceShader::name);
+	MString sFlStandardSurfaceFullClassification("shader/surface:" + sDrawFlStandardSurfaceDBClassification);
+	fnPlugin.registerNode(FlStandardSurfaceShader::name, FlStandardSurfaceShader::id, FlStandardSurfaceShader::creator, FlStandardSurfaceShader::initialize, MPxNode::kDependNode, &sFlStandardSurfaceFullClassification);
+	MHWRender::MDrawRegistry::registerSurfaceShadingNodeOverrideCreator(sDrawFlStandardSurfaceDBClassification, FlStandardSurfaceShader::name, FlStandardSurfaceShaderOverride::creator);
 
 	MString sDrawPlasticShaderDBClassification("drawdb/shader/surface/" + PlasticShaderNode::name);
 	MString sPlasticShaderFullClassification("shader/surface:" + sDrawPlasticShaderDBClassification);
@@ -62,9 +62,9 @@ MStatus uninitializePlugin(MObject plugin)
 	FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Error deregistering RenderGlobalNode.");
 
 	// Shading Nodes
-	MString sDrawMatteDBClassification("drawdb/shader/surface/" + MatteShaderNode::name);
-	fnPlugin.deregisterNode(MatteShaderNode::id);
-	MHWRender::MDrawRegistry::deregisterSurfaceShadingNodeOverrideCreator(sDrawMatteDBClassification, MatteShaderNode::name);
+	MString sDrawFlStandardSurfaceDBClassification("drawdb/shader/surface/" + FlStandardSurfaceShader::name);
+	fnPlugin.deregisterNode(FlStandardSurfaceShader::id);
+	MHWRender::MDrawRegistry::deregisterSurfaceShadingNodeOverrideCreator(sDrawFlStandardSurfaceDBClassification, FlStandardSurfaceShader::name);
 
 	MString sDrawPlasticShaderDBClassification("drawdb/shader/surface/" + PlasticShaderNode::name);
 	fnPlugin.deregisterNode(PlasticShaderNode::id);

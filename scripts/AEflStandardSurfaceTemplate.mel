@@ -1,0 +1,18 @@
+//
+global proc AEflStandardSurfaceTemplate(string $nodeName)
+{
+    AEswatchDisplay $nodeName;
+    editorTemplate -beginScrollLayout;
+
+    editorTemplate -beginLayout "Foundation" -collapse 0;
+		editorTemplate -addControl "Color";
+		editorTemplate -addControl "Weight";
+		editorTemplate -addControl "Roughness";
+	editorTemplate -endLayout;
+
+	// include/call base class/node attributes
+	AEdependNodeTemplate $nodeName;
+	
+	editorTemplate -addExtraControls;
+	editorTemplate -endScrollLayout;
+}

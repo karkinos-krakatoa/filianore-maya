@@ -54,13 +54,14 @@ set(SOURCE_FILES
   src/filianoremaya/meshexporter.cpp
   src/filianoremaya/illuminantsexporter.cpp
   src/filianoremaya/renderglobalsnode.cpp
-  src/filianoremaya/matteshadernode.cpp
-  src/filianoremaya/matteshader.cpp
   src/filianoremaya/plasticshadernode.cpp
   src/filianoremaya/plasticshader.cpp
+  src/filianoremaya/flstandardsurfaceshaderoverride.cpp
+  src/filianoremaya/flstandardsurfaceshader.cpp
   src/filianoremaya/materialprocessor.cpp
   src/filianoremaya/finalrendercommand.cpp
-  src/filianoremaya/pluginmain.cpp)
+  src/filianoremaya/pluginmain.cpp
+  )
 
 set(LIBRARIES 
      OpenMayaRender

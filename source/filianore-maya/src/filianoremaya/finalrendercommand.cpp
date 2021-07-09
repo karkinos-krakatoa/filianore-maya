@@ -143,10 +143,10 @@ MStatus FinalRenderCommand::doIt(const MArgList &args)
     std::shared_ptr<RayTraverser> rayTraverser = std::make_shared<RayTraverser>(bvhx);
 
     // Accel Setup
-    //std::shared_ptr<Primitive> bvh = std::make_shared<BVH>(scenePrimitives);
+    std::shared_ptr<Primitive> bvh = std::make_shared<BVH>(scenePrimitives);
 
     // Render components setup
-    Scene scene(rayTraverser, primitiveIntersector, illums);
+    Scene scene(bvh, illums);
     std::shared_ptr<Sampler> sampler = std::make_shared<Whitenoise>();
     std::unique_ptr<Integrator> integrator = std::make_unique<PathIntegrator>(renderParams);
     integrator->PrepareTheRenderer(scene, *sampler);
