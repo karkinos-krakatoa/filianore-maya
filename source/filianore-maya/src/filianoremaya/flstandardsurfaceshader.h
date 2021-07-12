@@ -22,12 +22,16 @@ public:
     static MObject nameData;
     static MObject nameAttr;
 
-    static MObject diffuseBaseColorR;
-    static MObject diffuseBaseColorG;
-    static MObject diffuseBaseColorB;
+    // Diffuse Foundation
     static MObject diffuseBaseColor;
     static MObject diffuseBaseWeight;
     static MObject diffuseBaseRoughness;
+
+    // Specular
+    static MObject specularColor;
+    static MObject specularWeight;
+    static MObject specularRoughness;
+    static MObject specularAnisotropic;
 
     static MObject aOutColorR;
     static MObject aOutColorG;

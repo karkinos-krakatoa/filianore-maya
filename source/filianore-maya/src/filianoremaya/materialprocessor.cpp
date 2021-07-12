@@ -12,7 +12,7 @@
 #include "filianore/textures/constant.h"
 
 #include "filianore/materials/lambert.h"
-#include "filianore/materials/matte.h"
+#include "filianore/materials/standardsurface.h"
 #include "filianore/materials/plastic.h"
 
 #include "filianore/color/spectrumoperations.h"
@@ -45,6 +45,7 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
     std::string materialName = mShaderName.asChar();
     if (materialName.find("flStandardSurface") != std::string::npos)
     {
+        // Foundation
         MPlug mDiffuseColorPlug(mShaderObject, FlStandardSurfaceShader::diffuseBaseColor);
         MFloatVector mDiffuseColor = mDiffuseColorPlug.asMDataHandle().asFloatVector();
 
@@ -58,9 +59,28 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
         std::shared_ptr<Texture<PrincipalSpectrum>> diffuseColorTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(diffuseColor);
         std::shared_ptr<Texture<float>> diffuseRoughnessTex = std::make_shared<ConstantTexture<float>>(mDiffuseRoughness);
 
-        std::shared_ptr<Material> matteMaterial = std::make_shared<MatteMaterial>(diffuseColorTex, diffuseRoughnessTex, mDiffuseWeight);
+        // Specular
+        MPlug mSpecColorPlug(mShaderObject, FlStandardSurfaceShader::specularColor);
+        MFloatVector mSpecColor = mSpecColorPlug.asMDataHandle().asFloatVector();
 
-        return matteMaterial;
+        MPlug mSpecWeightPlug(mShaderObject, FlStandardSurfaceShader::specularWeight);
+        float mSpecWeight = mSpecWeightPlug.asMDataHandle().asFloat();
+
+        MPlug mSpecRoughnessPlug(mShaderObject, FlStandardSurfaceShader::specularRoughness);
+        float mSpecRoughness = mSpecRoughnessPlug.asMDataHandle().asFloat();
+
+        MPlug mSpecAnisotropicPlug(mShaderObject, FlStandardSurfaceShader::specularAnisotropic);
+        float mSpecAnisotropic = mSpecAnisotropicPlug.asMDataHandle().asFloat();
+
+        PrincipalSpectrum specColor = FromReflectanceRGB(StaticArray<float, 3>(mSpecColor.x, mSpecColor.y, mSpecColor.z));
+        std::shared_ptr<Texture<PrincipalSpectrum>> specColorTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(specColor);
+        std::shared_ptr<Texture<float>> specRoughnessTex = std::make_shared<ConstantTexture<float>>(mSpecRoughness);
+
+        std::shared_ptr<Material> standardSurfaceMaterial = std::make_shared<StandardSurfaceMaterial>(
+            mDiffuseWeight, diffuseColorTex, diffuseRoughnessTex,
+            mSpecWeight, specColorTex, specRoughnessTex, mSpecAnisotropic);
+
+        return standardSurfaceMaterial;
     }
 
     if (materialName.find("flPlasticShader") != std::string::npos)
@@ -75,7 +95,7 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
         std::shared_ptr<Texture<PrincipalSpectrum>> specularColorTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(specColor);
 
         std::shared_ptr<Texture<float>> diffuseRoughnessTex = std::make_shared<ConstantTexture<float>>(0.1f);
-        std::shared_ptr<Texture<float>> specRoughnessTex = std::make_shared<ConstantTexture<float>>(0.3f);
+        std::shared_ptr<Texture<float>> specRoughnessTex = std::make_shared<ConstantTexture<float>>(0.f);
 
         std::shared_ptr<Material> plasticMaterial = std::make_shared<PlasticMaterial>(diffuseColorTex, diffuseRoughnessTex, 1.f,
                                                                                       specularColorTex, specRoughnessTex, 1.f);

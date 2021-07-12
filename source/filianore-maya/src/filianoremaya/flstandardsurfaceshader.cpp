@@ -13,11 +13,13 @@ MObject FlStandardSurfaceShader::nameData;
 MObject FlStandardSurfaceShader::nameAttr;
 
 MObject FlStandardSurfaceShader::diffuseBaseColor;
-MObject FlStandardSurfaceShader::diffuseBaseColorR;
-MObject FlStandardSurfaceShader::diffuseBaseColorG;
-MObject FlStandardSurfaceShader::diffuseBaseColorB;
 MObject FlStandardSurfaceShader::diffuseBaseWeight;
 MObject FlStandardSurfaceShader::diffuseBaseRoughness;
+
+MObject FlStandardSurfaceShader::specularColor;
+MObject FlStandardSurfaceShader::specularWeight;
+MObject FlStandardSurfaceShader::specularRoughness;
+MObject FlStandardSurfaceShader::specularAnisotropic;
 
 MObject FlStandardSurfaceShader::aOutColor;
 MObject FlStandardSurfaceShader::aOutColorR;
@@ -43,6 +45,18 @@ MObject FlStandardSurfaceShader::aLightSpecular;
 MObject FlStandardSurfaceShader::aLightShadowFraction;
 MObject FlStandardSurfaceShader::aPreShadowIntensity;
 MObject FlStandardSurfaceShader::aLightBlindData;
+
+#define MAKE_INPUT(attr)                   \
+    CHECK_MSTATUS(attr.setKeyable(true));  \
+    CHECK_MSTATUS(attr.setStorable(true)); \
+    CHECK_MSTATUS(attr.setReadable(true)); \
+    CHECK_MSTATUS(attr.setWritable(true));
+
+#define MAKE_OUTPUT(attr)                   \
+    CHECK_MSTATUS(attr.setKeyable(false));  \
+    CHECK_MSTATUS(attr.setStorable(false)); \
+    CHECK_MSTATUS(attr.setReadable(true));  \
+    CHECK_MSTATUS(attr.setWritable(false));
 
 FlStandardSurfaceShader::FlStandardSurfaceShader()
 {
@@ -70,38 +84,47 @@ MStatus FlStandardSurfaceShader::initialize()
     nameAttr = typedAttr.create("materialName", "mn", MFnData::kString, nameData, &status);
     CHECK_MSTATUS(typedAttr.setWritable(false));
 
-    /** BASE DIFFUSE **/
+    /** FOUNDATION DIFFUSE **/
     // Color
-    diffuseBaseColorR = numAttr.create("dfcolorR", "dfcolorR", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
-    CHECK_MSTATUS(numAttr.setKeyable(true));
-    CHECK_MSTATUS(numAttr.setDefault(0.5));
-    diffuseBaseColorG = numAttr.create("dfcolorG", "dfcolorG", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
-    CHECK_MSTATUS(numAttr.setKeyable(true));
-    CHECK_MSTATUS(numAttr.setDefault(0.5));
-    diffuseBaseColorB = numAttr.create("dfcolorB", "dfcolorB", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
-    CHECK_MSTATUS(numAttr.setKeyable(true));
-    CHECK_MSTATUS(numAttr.setDefault(0.5));
-    diffuseBaseColor = numAttr.create("Color", "dfcolor", diffuseBaseColorR, diffuseBaseColorG, diffuseBaseColorB, &status);
-    CHECK_MSTATUS(status);
-    CHECK_MSTATUS(numAttr.setKeyable(true));
-    CHECK_MSTATUS(numAttr.setDefault(0.5, 0.5, 0.5));
-    CHECK_MSTATUS(numAttr.setUsedAsColor(true));
+    diffuseBaseColor = numAttr.createColor("color", "dfcolor", &status);
+    MAKE_INPUT(numAttr);
+    CHECK_MSTATUS(numAttr.setDefault(0.6f, 0.6f, 0.6f));
+
     // Weight
-    diffuseBaseWeight = numAttr.create("Weight", "dfweight", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
-    CHECK_MSTATUS(numAttr.setKeyable(true));
+    diffuseBaseWeight = numAttr.create("diffuseWeight", "dfweight", MFnNumericData::kFloat);
+    MAKE_INPUT(numAttr);
     CHECK_MSTATUS(numAttr.setDefault(0.85));
     CHECK_MSTATUS(numAttr.setMin(0));
     CHECK_MSTATUS(numAttr.setMax(1));
     // Roughness
-    diffuseBaseRoughness = numAttr.create("Roughness", "dfroughness", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
-    CHECK_MSTATUS(numAttr.setKeyable(true));
+    diffuseBaseRoughness = numAttr.create("diffuseRoughness", "dfroughness", MFnNumericData::kFloat);
+    MAKE_INPUT(numAttr);
     CHECK_MSTATUS(numAttr.setDefault(0));
     CHECK_MSTATUS(numAttr.setMin(0));
+    CHECK_MSTATUS(numAttr.setMax(1));
+
+    /** SPECULAR **/
+    // Color
+    specularColor = numAttr.createColor("specularColor", "speccolor", &status);
+    MAKE_INPUT(numAttr);
+    CHECK_MSTATUS(numAttr.setDefault(1.f, 1.f, 1.f));
+    // Weight
+    specularWeight = numAttr.create("specularWeight", "specweight", MFnNumericData::kFloat);
+    MAKE_INPUT(numAttr);
+    CHECK_MSTATUS(numAttr.setDefault(0.95));
+    CHECK_MSTATUS(numAttr.setMin(0));
+    CHECK_MSTATUS(numAttr.setMax(1));
+    // Roughness
+    specularRoughness = numAttr.create("specularRoughness", "specroughness", MFnNumericData::kFloat);
+    MAKE_INPUT(numAttr);
+    CHECK_MSTATUS(numAttr.setDefault(0));
+    CHECK_MSTATUS(numAttr.setMin(0));
+    CHECK_MSTATUS(numAttr.setMax(1));
+    // Anisotropic
+    specularAnisotropic = numAttr.create("specularAnisotropic", "specanisotropic", MFnNumericData::kFloat);
+    MAKE_INPUT(numAttr);
+    CHECK_MSTATUS(numAttr.setDefault(0));
+    CHECK_MSTATUS(numAttr.setMin(-1));
     CHECK_MSTATUS(numAttr.setMax(1));
 
     /** OUT COLOR **/
@@ -264,21 +287,32 @@ MStatus FlStandardSurfaceShader::initialize()
     CHECK_MSTATUS(lAttr.setDefault(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, true, true, false, 1.0f, 1.0f, NULL));
 
     CHECK_MSTATUS(addAttribute(nameAttr));
+
     CHECK_MSTATUS(addAttribute(diffuseBaseColor));
     CHECK_MSTATUS(addAttribute(diffuseBaseWeight));
     CHECK_MSTATUS(addAttribute(diffuseBaseRoughness));
+
+    CHECK_MSTATUS(addAttribute(specularColor));
+    CHECK_MSTATUS(addAttribute(specularWeight));
+    CHECK_MSTATUS(addAttribute(specularRoughness));
+    CHECK_MSTATUS(addAttribute(specularAnisotropic));
+
     CHECK_MSTATUS(addAttribute(aOutColor));
 
     CHECK_MSTATUS(addAttribute(aNormalCamera));
 
     CHECK_MSTATUS(addAttribute(aLightData));
 
-    CHECK_MSTATUS(attributeAffects(diffuseBaseColorR, aOutColor));
-    CHECK_MSTATUS(attributeAffects(diffuseBaseColorG, aOutColor));
-    CHECK_MSTATUS(attributeAffects(diffuseBaseColorB, aOutColor));
+    //
     CHECK_MSTATUS(attributeAffects(diffuseBaseColor, aOutColor));
     CHECK_MSTATUS(attributeAffects(diffuseBaseRoughness, aOutColor));
     CHECK_MSTATUS(attributeAffects(diffuseBaseWeight, aOutColor));
+
+    CHECK_MSTATUS(attributeAffects(specularColor, aOutColor));
+    CHECK_MSTATUS(attributeAffects(specularRoughness, aOutColor));
+    CHECK_MSTATUS(attributeAffects(specularWeight, aOutColor));
+    CHECK_MSTATUS(attributeAffects(specularAnisotropic, aOutColor));
+
     CHECK_MSTATUS(attributeAffects(aLightIntensityR, aOutColor));
     CHECK_MSTATUS(attributeAffects(aLightIntensityB, aOutColor));
     CHECK_MSTATUS(attributeAffects(aLightIntensityG, aOutColor));

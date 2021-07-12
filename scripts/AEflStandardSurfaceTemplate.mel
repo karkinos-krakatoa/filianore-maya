@@ -5,9 +5,16 @@ global proc AEflStandardSurfaceTemplate(string $nodeName)
     editorTemplate -beginScrollLayout;
 
     editorTemplate -beginLayout "Foundation" -collapse 0;
-		editorTemplate -addControl "Color";
-		editorTemplate -addControl "Weight";
-		editorTemplate -addControl "Roughness";
+		editorTemplate -label "Color" -addControl "color";
+		editorTemplate -label "Weight" -addControl "diffuseWeight";
+		editorTemplate -label "Roughness" -addControl "diffuseRoughness";
+	editorTemplate -endLayout;
+
+	editorTemplate -beginLayout "Specular" -collapse 0;
+		editorTemplate -label "Color" -addControl "specularColor";
+		editorTemplate -label "Weight" -addControl "specularWeight";
+		editorTemplate -label "Roughness" -addControl "specularRoughness";
+		editorTemplate -label "Anisotropic" -addControl "specularAnisotropic";
 	editorTemplate -endLayout;
 
 	// include/call base class/node attributes
