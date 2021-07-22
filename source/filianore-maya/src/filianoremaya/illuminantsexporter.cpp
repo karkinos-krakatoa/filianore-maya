@@ -132,7 +132,7 @@ IlluminantExporterResponse IlluminantExporter::ExportIlluminants(const std::vect
             }
 
             Transform _transform = Translate(transformData.Translate) *
-                                   (RotateX(transformData.Rotate.x(), true) * RotateY(transformData.Rotate.y(), true) * RotateZ(transformData.Rotate.z(), true)) *
+                                   (RotateZ(transformData.Rotate.z(), true) * RotateY(transformData.Rotate.y(), true) * RotateX(transformData.Rotate.x(), true)) *
                                    Scale(transformData.Scale.x(), transformData.Scale.y(), transformData.Scale.z());
 
             ShapeCreator shapeCreator;

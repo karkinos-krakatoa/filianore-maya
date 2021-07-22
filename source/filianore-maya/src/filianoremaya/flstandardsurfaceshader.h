@@ -32,6 +32,7 @@ public:
     static MObject specularWeight;
     static MObject specularRoughness;
     static MObject specularAnisotropic;
+    static MObject specularIOR;
 
     static MObject aOutColorR;
     static MObject aOutColorG;

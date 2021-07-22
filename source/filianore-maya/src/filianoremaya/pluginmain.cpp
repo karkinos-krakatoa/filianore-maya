@@ -3,9 +3,8 @@
 
 #include "flstandardsurfaceshaderoverride.h"
 #include "flstandardsurfaceshader.h"
-
-#include "plasticshadernode.h"
-#include "plasticshader.h"
+#include "flplasticshaderoverride.h"
+#include "flplasticshader.h"
 
 #include "renderglobalsnode.h"
 #include "finalrendercommand.h"
@@ -33,10 +32,10 @@ MStatus initializePlugin(MObject plugin)
 	fnPlugin.registerNode(FlStandardSurfaceShader::name, FlStandardSurfaceShader::id, FlStandardSurfaceShader::creator, FlStandardSurfaceShader::initialize, MPxNode::kDependNode, &sFlStandardSurfaceFullClassification);
 	MHWRender::MDrawRegistry::registerSurfaceShadingNodeOverrideCreator(sDrawFlStandardSurfaceDBClassification, FlStandardSurfaceShader::name, FlStandardSurfaceShaderOverride::creator);
 
-	MString sDrawPlasticShaderDBClassification("drawdb/shader/surface/" + PlasticShaderNode::name);
+	MString sDrawPlasticShaderDBClassification("drawdb/shader/surface/" + FlPlasticShader::name);
 	MString sPlasticShaderFullClassification("shader/surface:" + sDrawPlasticShaderDBClassification);
-	fnPlugin.registerNode(PlasticShaderNode::name, PlasticShaderNode::id, PlasticShaderNode::creator, PlasticShaderNode::initialize, MPxNode::kDependNode, &sPlasticShaderFullClassification);
-	MHWRender::MDrawRegistry::registerSurfaceShadingNodeOverrideCreator(sDrawPlasticShaderDBClassification, PlasticShaderNode::name, PlasticShader::creator);
+	fnPlugin.registerNode(FlPlasticShader::name, FlPlasticShader::id, FlPlasticShader::creator, FlPlasticShader::initialize, MPxNode::kDependNode, &sPlasticShaderFullClassification);
+	MHWRender::MDrawRegistry::registerSurfaceShadingNodeOverrideCreator(sDrawPlasticShaderDBClassification, FlPlasticShader::name, FlPlasticShaderOverride::creator);
 
 	// Commands
 	status = fnPlugin.registerCommand(FinalRenderCommand::commandName, FinalRenderCommand::creator);
@@ -66,9 +65,9 @@ MStatus uninitializePlugin(MObject plugin)
 	fnPlugin.deregisterNode(FlStandardSurfaceShader::id);
 	MHWRender::MDrawRegistry::deregisterSurfaceShadingNodeOverrideCreator(sDrawFlStandardSurfaceDBClassification, FlStandardSurfaceShader::name);
 
-	MString sDrawPlasticShaderDBClassification("drawdb/shader/surface/" + PlasticShaderNode::name);
-	fnPlugin.deregisterNode(PlasticShaderNode::id);
-	MHWRender::MDrawRegistry::deregisterSurfaceShadingNodeOverrideCreator(sDrawPlasticShaderDBClassification, PlasticShaderNode::name);
+	MString sDrawPlasticShaderDBClassification("drawdb/shader/surface/" + FlPlasticShader::name);
+	fnPlugin.deregisterNode(FlPlasticShader::id);
+	MHWRender::MDrawRegistry::deregisterSurfaceShadingNodeOverrideCreator(sDrawPlasticShaderDBClassification, FlPlasticShader::name);
 
 	// Commands
 	status = fnPlugin.deregisterCommand(FinalRenderCommand::commandName);

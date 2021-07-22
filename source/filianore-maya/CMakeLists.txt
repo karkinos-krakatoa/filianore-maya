@@ -54,8 +54,8 @@ set(SOURCE_FILES
   src/filianoremaya/meshexporter.cpp
   src/filianoremaya/illuminantsexporter.cpp
   src/filianoremaya/renderglobalsnode.cpp
-  src/filianoremaya/plasticshadernode.cpp
-  src/filianoremaya/plasticshader.cpp
+  src/filianoremaya/flplasticshaderoverride.cpp
+  src/filianoremaya/flplasticshader.cpp
   src/filianoremaya/flstandardsurfaceshaderoverride.cpp
   src/filianoremaya/flstandardsurfaceshader.cpp
   src/filianoremaya/materialprocessor.cpp

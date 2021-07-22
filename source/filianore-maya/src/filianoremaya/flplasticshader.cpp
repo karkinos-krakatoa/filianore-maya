@@ -1,4 +1,4 @@
-#include "flstandardsurfaceshader.h"
+#include "flplasticshader.h"
 
 #include <maya/MFloatVector.h>
 #include <maya/MFnNumericAttribute.h>
@@ -6,46 +6,45 @@
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnLightDataAttribute.h>
 
-const MString FlStandardSurfaceShader::name("flStandardSurface");
-const MTypeId FlStandardSurfaceShader::id(0x00132b44);
+const MString FlPlasticShader::name("flPlastic");
+const MTypeId FlPlasticShader::id(0x00132b43);
 
-MObject FlStandardSurfaceShader::nameData;
-MObject FlStandardSurfaceShader::nameAttr;
+MObject FlPlasticShader::nameData;
+MObject FlPlasticShader::nameAttr;
 
-MObject FlStandardSurfaceShader::diffuseBaseColor;
-MObject FlStandardSurfaceShader::diffuseBaseWeight;
-MObject FlStandardSurfaceShader::diffuseBaseRoughness;
+MObject FlPlasticShader::diffuseBaseColor;
+MObject FlPlasticShader::diffuseBaseWeight;
 
-MObject FlStandardSurfaceShader::specularColor;
-MObject FlStandardSurfaceShader::specularWeight;
-MObject FlStandardSurfaceShader::specularRoughness;
-MObject FlStandardSurfaceShader::specularAnisotropic;
-MObject FlStandardSurfaceShader::specularIOR;
+MObject FlPlasticShader::specularColor;
+MObject FlPlasticShader::specularWeight;
+MObject FlPlasticShader::specularRoughness;
+MObject FlPlasticShader::specularAnisotropic;
+MObject FlPlasticShader::specularIOR;
 
-MObject FlStandardSurfaceShader::aOutColor;
-MObject FlStandardSurfaceShader::aOutColorR;
-MObject FlStandardSurfaceShader::aOutColorG;
-MObject FlStandardSurfaceShader::aOutColorB;
+MObject FlPlasticShader::aOutColor;
+MObject FlPlasticShader::aOutColorR;
+MObject FlPlasticShader::aOutColorG;
+MObject FlPlasticShader::aOutColorB;
 
-MObject FlStandardSurfaceShader::aNormalCamera;
-MObject FlStandardSurfaceShader::aNormalCameraX;
-MObject FlStandardSurfaceShader::aNormalCameraY;
-MObject FlStandardSurfaceShader::aNormalCameraZ;
-MObject FlStandardSurfaceShader::aLightData;
-MObject FlStandardSurfaceShader::aLightDirection;
-MObject FlStandardSurfaceShader::aLightDirectionX;
-MObject FlStandardSurfaceShader::aLightDirectionY;
-MObject FlStandardSurfaceShader::aLightDirectionZ;
-MObject FlStandardSurfaceShader::aLightIntensity;
-MObject FlStandardSurfaceShader::aLightIntensityR;
-MObject FlStandardSurfaceShader::aLightIntensityG;
-MObject FlStandardSurfaceShader::aLightIntensityB;
-MObject FlStandardSurfaceShader::aLightAmbient;
-MObject FlStandardSurfaceShader::aLightDiffuse;
-MObject FlStandardSurfaceShader::aLightSpecular;
-MObject FlStandardSurfaceShader::aLightShadowFraction;
-MObject FlStandardSurfaceShader::aPreShadowIntensity;
-MObject FlStandardSurfaceShader::aLightBlindData;
+MObject FlPlasticShader::aNormalCamera;
+MObject FlPlasticShader::aNormalCameraX;
+MObject FlPlasticShader::aNormalCameraY;
+MObject FlPlasticShader::aNormalCameraZ;
+MObject FlPlasticShader::aLightData;
+MObject FlPlasticShader::aLightDirection;
+MObject FlPlasticShader::aLightDirectionX;
+MObject FlPlasticShader::aLightDirectionY;
+MObject FlPlasticShader::aLightDirectionZ;
+MObject FlPlasticShader::aLightIntensity;
+MObject FlPlasticShader::aLightIntensityR;
+MObject FlPlasticShader::aLightIntensityG;
+MObject FlPlasticShader::aLightIntensityB;
+MObject FlPlasticShader::aLightAmbient;
+MObject FlPlasticShader::aLightDiffuse;
+MObject FlPlasticShader::aLightSpecular;
+MObject FlPlasticShader::aLightShadowFraction;
+MObject FlPlasticShader::aPreShadowIntensity;
+MObject FlPlasticShader::aLightBlindData;
 
 #define MAKE_INPUT(attr)                   \
     CHECK_MSTATUS(attr.setKeyable(true));  \
@@ -59,20 +58,20 @@ MObject FlStandardSurfaceShader::aLightBlindData;
     CHECK_MSTATUS(attr.setReadable(true));  \
     CHECK_MSTATUS(attr.setWritable(false));
 
-FlStandardSurfaceShader::FlStandardSurfaceShader()
+FlPlasticShader::FlPlasticShader()
 {
 }
 
-FlStandardSurfaceShader::~FlStandardSurfaceShader()
+FlPlasticShader::~FlPlasticShader()
 {
 }
 
-void *FlStandardSurfaceShader::creator()
+void *FlPlasticShader::creator()
 {
-    return new FlStandardSurfaceShader();
+    return new FlPlasticShader();
 }
 
-MStatus FlStandardSurfaceShader::initialize()
+MStatus FlPlasticShader::initialize()
 {
     MStatus status;
     MFnNumericAttribute numAttr;
@@ -85,7 +84,7 @@ MStatus FlStandardSurfaceShader::initialize()
     nameAttr = typedAttr.create("materialName", "mn", MFnData::kString, nameData, &status);
     CHECK_MSTATUS(typedAttr.setWritable(false));
 
-    /** FOUNDATION DIFFUSE **/
+    /** DIFFUSE **/
     // Color
     diffuseBaseColor = numAttr.createColor("color", "dfcolor", &status);
     MAKE_INPUT(numAttr);
@@ -95,12 +94,6 @@ MStatus FlStandardSurfaceShader::initialize()
     diffuseBaseWeight = numAttr.create("diffuseWeight", "dfweight", MFnNumericData::kFloat);
     MAKE_INPUT(numAttr);
     CHECK_MSTATUS(numAttr.setDefault(0.85));
-    CHECK_MSTATUS(numAttr.setMin(0));
-    CHECK_MSTATUS(numAttr.setMax(1));
-    // Roughness
-    diffuseBaseRoughness = numAttr.create("diffuseRoughness", "dfroughness", MFnNumericData::kFloat);
-    MAKE_INPUT(numAttr);
-    CHECK_MSTATUS(numAttr.setDefault(0));
     CHECK_MSTATUS(numAttr.setMin(0));
     CHECK_MSTATUS(numAttr.setMax(1));
 
@@ -297,7 +290,6 @@ MStatus FlStandardSurfaceShader::initialize()
 
     CHECK_MSTATUS(addAttribute(diffuseBaseColor));
     CHECK_MSTATUS(addAttribute(diffuseBaseWeight));
-    CHECK_MSTATUS(addAttribute(diffuseBaseRoughness));
 
     CHECK_MSTATUS(addAttribute(specularColor));
     CHECK_MSTATUS(addAttribute(specularWeight));
@@ -313,7 +305,6 @@ MStatus FlStandardSurfaceShader::initialize()
 
     //
     CHECK_MSTATUS(attributeAffects(diffuseBaseColor, aOutColor));
-    CHECK_MSTATUS(attributeAffects(diffuseBaseRoughness, aOutColor));
     CHECK_MSTATUS(attributeAffects(diffuseBaseWeight, aOutColor));
 
     CHECK_MSTATUS(attributeAffects(specularColor, aOutColor));
@@ -345,7 +336,7 @@ MStatus FlStandardSurfaceShader::initialize()
     return (MS::kSuccess);
 }
 
-MStatus FlStandardSurfaceShader::compute(const MPlug &plug, MDataBlock &block)
+MStatus FlPlasticShader::compute(const MPlug &plug, MDataBlock &block)
 {
     if (plug == aOutColorR || plug == aOutColorG || plug == aOutColorB || plug == aOutColor)
     {

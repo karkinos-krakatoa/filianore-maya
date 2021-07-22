@@ -1,5 +1,5 @@
 //
-global proc AEflStandardSurfaceTemplate(string $nodeName)
+global proc AEflPlasticTemplate(string $nodeName)
 {
     AEswatchDisplay $nodeName;
     editorTemplate -beginScrollLayout;
@@ -7,7 +7,6 @@ global proc AEflStandardSurfaceTemplate(string $nodeName)
     editorTemplate -beginLayout "Foundation" -collapse 0;
 		editorTemplate -label "Color" -addControl "color";
 		editorTemplate -label "Weight" -addControl "diffuseWeight";
-		editorTemplate -label "Roughness" -addControl "diffuseRoughness";
 	editorTemplate -endLayout;
 
 	editorTemplate -beginLayout "Specular" -collapse 0;
