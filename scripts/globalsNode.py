@@ -134,61 +134,14 @@ class FilianoreRendererCommonTab(FilianoreRendererGenericTab):
                         pm.separator(height=2)
 
                         pm.attrFieldSliderGrp(
-                            label="Specular:",
+                            label="Reflection:",
                             columnWidth=(3, 160),
                             columnAttach=(1, "right", 4),
                             minValue=0,
                             maxValue=100,
                             fieldMinValue=0,
                             fieldMaxValue=100,
-                            attribute="filianoreRendererGlobalsNode.specularRayDepth")
-
-                        pm.separator(height=2)
-
-                        pm.attrFieldSliderGrp(
-                            label="Glossy:",
-                            columnWidth=(3, 160),
-                            columnAttach=(1, "right", 4),
-                            minValue=0,
-                            maxValue=100,
-                            fieldMinValue=0,
-                            fieldMaxValue=100,
-                            attribute="filianoreRendererGlobalsNode.glossyRayDepth")
-
-                with pm.frameLayout("colorMgtFrameLayout", label="Color Management", collapsable=True, collapse=False):
-                    with pm.columnLayout("colorMgtColumnLayout", adjustableColumn=True, width=380,
-                                         rowSpacing=2):
-
-                        pm.separator(height=2)
-
-                        pm.attrEnumOptionMenuGrp(
-                            label="Gamma Correct",
-                            columnWidth=(3, 160),
-                            columnAttach=(1, "right", 4),
-                            enumeratedItem=[
-                                [1, "None"],
-                                [2, "Rec 709"],
-                                [3, "Gamma 1.8"],
-                                [4, "Gamma 2.2"],
-                                [5, "Gamma 4.0"]
-                            ],
-                            attribute="filianoreRendererGlobalsNode.clrGammaCorrect"
-                        )
-
-                        pm.separator(height=2)
-
-                        pm.attrEnumOptionMenuGrp(
-                            label="Tonemapping",
-                            columnWidth=(3, 160),
-                            columnAttach=(1, "right", 4),
-                            enumeratedItem=[
-                                [1, "None"],
-                                [2, "ACES Basic"],
-                                [3, "Reinhard"],
-                                [4, "Filmic"]
-                            ],
-                            attribute="filianoreRendererGlobalsNode.clrTonemap"
-                        )
+                            attribute="filianoreRendererGlobalsNode.reflectionRayDepth")
 
         pm.setUITemplate("renderGlobalsTemplate", popTemplate=True)
         pm.setUITemplate("attributeEditorTemplate", popTemplate=True)

@@ -10,12 +10,23 @@ global proc AEflStandardSurfaceTemplate(string $nodeName)
 		editorTemplate -label "Roughness" -addControl "diffuseRoughness";
 	editorTemplate -endLayout;
 
+	editorTemplate -beginLayout "Metallurgy" -collapse 0;
+		editorTemplate -label "Preset" -addControl "metallicPreset";
+		editorTemplate -label "Weight" -addControl "metallicWeight";
+	editorTemplate -endLayout;
+
 	editorTemplate -beginLayout "Specular" -collapse 0;
 		editorTemplate -label "Color" -addControl "specularColor";
 		editorTemplate -label "Weight" -addControl "specularWeight";
 		editorTemplate -label "Roughness" -addControl "specularRoughness";
 		editorTemplate -label "Anisotropic" -addControl "specularAnisotropic";
 		editorTemplate -label "IOR" -addControl "specularIOR";
+	editorTemplate -endLayout;
+
+	editorTemplate -beginLayout "Sheen" -collapse 0;
+		editorTemplate -label "Color" -addControl "sheenColor";
+		editorTemplate -label "Weight" -addControl "sheenWeight";
+		editorTemplate -label "Roughness" -addControl "sheenRoughness";
 	editorTemplate -endLayout;
 
 	// include/call base class/node attributes

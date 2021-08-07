@@ -22,10 +22,14 @@ public:
     static MObject nameData;
     static MObject nameAttr;
 
-    // Diffuse Foundation
+    // Foundation
     static MObject diffuseBaseColor;
     static MObject diffuseBaseWeight;
     static MObject diffuseBaseRoughness;
+
+    // Metallurgy
+    static MObject metallicPreset;
+    static MObject metallicWeight;
 
     // Specular
     static MObject specularColor;
@@ -33,6 +37,11 @@ public:
     static MObject specularRoughness;
     static MObject specularAnisotropic;
     static MObject specularIOR;
+
+    // Sheen
+    static MObject sheenColor;
+    static MObject sheenWeight;
+    static MObject sheenRoughness;
 
     static MObject aOutColorR;
     static MObject aOutColorG;

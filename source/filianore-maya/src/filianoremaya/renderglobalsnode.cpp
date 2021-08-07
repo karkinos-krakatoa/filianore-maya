@@ -17,10 +17,7 @@ RenderParams RenderGlobalsNode::context;
 
 MObject RenderGlobalsNode::samples;
 MObject RenderGlobalsNode::diffuseRayDepth;
-MObject RenderGlobalsNode::specularRayDepth;
-MObject RenderGlobalsNode::glossyRayDepth;
-MObject RenderGlobalsNode::gammaCorrect;
-MObject RenderGlobalsNode::tonemap;
+MObject RenderGlobalsNode::reflectionRayDepth;
 
 void *RenderGlobalsNode::creator()
 {
@@ -45,34 +42,11 @@ MStatus RenderGlobalsNode::initialize()
     numAttr.setMax(100);
     addAttribute(diffuseRayDepth);
 
-    specularRayDepth = numAttr.create("specularRayDepth", "specularRayDepth", MFnNumericData::kInt, 0, &status);
-    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to add [Specular Ray Depth] Attribute.");
+    reflectionRayDepth = numAttr.create("reflectionRayDepth", "reflectionRayDepth", MFnNumericData::kInt, 0, &status);
+    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to add [Reflection Ray Depth] Attribute.");
     numAttr.setMin(0);
     numAttr.setMax(100);
-    addAttribute(specularRayDepth);
-
-    glossyRayDepth = numAttr.create("glossyRayDepth", "glossyRayDepth", MFnNumericData::kInt, 0, &status);
-    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to add [Glossy Ray Depth] Attribute.");
-    numAttr.setMin(0);
-    numAttr.setMax(100);
-    addAttribute(glossyRayDepth);
-
-    gammaCorrect = enumAttrFn.create("clrGammaCorrect", "clrGammaCorrect", 2, &status);
-    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to add [Gamma Correct] Attribute");
-    enumAttrFn.addField("None", 1);
-    enumAttrFn.addField("Rec 709", 2);
-    enumAttrFn.addField("Gamma 1.8", 3);
-    enumAttrFn.addField("Gamma 2.2", 4);
-    enumAttrFn.addField("Gamma 4.0", 5);
-    addAttribute(gammaCorrect);
-
-    tonemap = enumAttrFn.create("clrTonemap", "clrTonemap", 1, &status);
-    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to add [Tonemapping] Attribute");
-    enumAttrFn.addField("None", 1);
-    enumAttrFn.addField("ACES Basic", 2);
-    enumAttrFn.addField("Reinhard", 3);
-    enumAttrFn.addField("Filmic", 4);
-    addAttribute(tonemap);
+    addAttribute(reflectionRayDepth);
 
     return (MS::kSuccess);
 }
@@ -99,21 +73,9 @@ const RenderParams &RenderGlobalsNode::fetchContext()
     status = mDiffuseRayDepthPlug.getValue(context.diffuseRayDepth);
     FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Diffuse Ray Depth] Attribute value.");
 
-    MPlug mSpecularRayDepthPlug(mObj, specularRayDepth);
-    status = mSpecularRayDepthPlug.getValue(context.specularRayDepth);
-    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Specular Ray Depth] Attribute value.");
-
-    MPlug mGlossyRayDepthPlug(mObj, glossyRayDepth);
-    status = mGlossyRayDepthPlug.getValue(context.glossyRayDepth);
-    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Glossy Ray Depth] Attribute value.");
-
-    MPlug mGammaCorrectPlug(mObj, gammaCorrect);
-    status = mGammaCorrectPlug.getValue(context.gammaCorrectType);
-    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Gamma Correct] Attribute value.");
-
-    MPlug mTonemappingPlug(mObj, tonemap);
-    status = mTonemappingPlug.getValue(context.tonemapType);
-    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Tonemapping] Attribute value.");
+    MPlug mReflectionRayDepthPlug(mObj, reflectionRayDepth);
+    status = mReflectionRayDepthPlug.getValue(context.reflectionRayDepth);
+    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Reflection Ray Depth] Attribute value.");
 
     return (context);
 }
@@ -132,11 +94,7 @@ void RenderGlobalsNode::clean()
 
     modifier.deleteNode(samples);
     modifier.deleteNode(diffuseRayDepth);
-    modifier.deleteNode(specularRayDepth);
-    modifier.deleteNode(glossyRayDepth);
-
-    modifier.deleteNode(gammaCorrect);
-    modifier.deleteNode(tonemap);
+    modifier.deleteNode(reflectionRayDepth);
 
     modifier.deleteNode(mObj);
 

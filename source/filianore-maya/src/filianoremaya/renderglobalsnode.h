@@ -28,11 +28,7 @@ private:
 
     static MObject samples;
     static MObject diffuseRayDepth;
-    static MObject specularRayDepth;
-    static MObject glossyRayDepth;
-
-    static MObject gammaCorrect;
-    static MObject tonemap;
+    static MObject reflectionRayDepth;
 };
 
 #endif
