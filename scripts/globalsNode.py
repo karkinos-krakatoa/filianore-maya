@@ -143,6 +143,18 @@ class FilianoreRendererCommonTab(FilianoreRendererGenericTab):
                             fieldMaxValue=100,
                             attribute="filianoreRendererGlobalsNode.reflectionRayDepth")
 
+                        pm.separator(height=2)
+
+                        pm.attrFieldSliderGrp(
+                            label="Transmission:",
+                            columnWidth=(3, 160),
+                            columnAttach=(1, "right", 4),
+                            minValue=0,
+                            maxValue=100,
+                            fieldMinValue=0,
+                            fieldMaxValue=100,
+                            attribute="filianoreRendererGlobalsNode.transmissionRayDepth")
+
         pm.setUITemplate("renderGlobalsTemplate", popTemplate=True)
         pm.setUITemplate("attributeEditorTemplate", popTemplate=True)
         pm.formLayout(

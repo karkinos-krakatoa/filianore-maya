@@ -29,6 +29,11 @@ global proc AEflStandardSurfaceTemplate(string $nodeName)
 		editorTemplate -label "Roughness" -addControl "sheenRoughness";
 	editorTemplate -endLayout;
 
+	editorTemplate -beginLayout "Transmission" -collapse 0;
+		editorTemplate -label "Color" -addControl "transmissionColor";
+		editorTemplate -label "Weight" -addControl "transmissionWeight";
+	editorTemplate -endLayout;
+
 	// include/call base class/node attributes
 	AEdependNodeTemplate $nodeName;
 	

@@ -29,6 +29,7 @@ private:
     static MObject samples;
     static MObject diffuseRayDepth;
     static MObject reflectionRayDepth;
+    static MObject transmissionRayDepth;
 };
 
 #endif

@@ -18,6 +18,7 @@ RenderParams RenderGlobalsNode::context;
 MObject RenderGlobalsNode::samples;
 MObject RenderGlobalsNode::diffuseRayDepth;
 MObject RenderGlobalsNode::reflectionRayDepth;
+MObject RenderGlobalsNode::transmissionRayDepth;
 
 void *RenderGlobalsNode::creator()
 {
@@ -48,6 +49,12 @@ MStatus RenderGlobalsNode::initialize()
     numAttr.setMax(100);
     addAttribute(reflectionRayDepth);
 
+    transmissionRayDepth = numAttr.create("transmissionRayDepth", "transmissionRayDepth", MFnNumericData::kInt, 0, &status);
+    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to add [Transmission Ray Depth] Attribute.");
+    numAttr.setMin(0);
+    numAttr.setMax(100);
+    addAttribute(transmissionRayDepth);
+
     return (MS::kSuccess);
 }
 
@@ -77,6 +84,10 @@ const RenderParams &RenderGlobalsNode::fetchContext()
     status = mReflectionRayDepthPlug.getValue(context.reflectionRayDepth);
     FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Reflection Ray Depth] Attribute value.");
 
+    MPlug mTransmissionRayDepthPlug(mObj, transmissionRayDepth);
+    status = mTransmissionRayDepthPlug.getValue(context.transmissionRayDepth);
+    FILIANORE_MAYA_CHECK_MSTATUS_MSG(status, "Failed to read [Transmission Ray Depth] Attribute value.");
+
     return (context);
 }
 
@@ -95,6 +106,7 @@ void RenderGlobalsNode::clean()
     modifier.deleteNode(samples);
     modifier.deleteNode(diffuseRayDepth);
     modifier.deleteNode(reflectionRayDepth);
+    modifier.deleteNode(transmissionRayDepth);
 
     modifier.deleteNode(mObj);
 

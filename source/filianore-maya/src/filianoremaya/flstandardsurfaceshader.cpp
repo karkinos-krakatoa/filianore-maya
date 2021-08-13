@@ -26,6 +26,9 @@ MObject FlStandardSurfaceShader::specularRoughness;
 MObject FlStandardSurfaceShader::specularAnisotropic;
 MObject FlStandardSurfaceShader::specularIOR;
 
+MObject FlStandardSurfaceShader::transmissionColor;
+MObject FlStandardSurfaceShader::transmissionWeight;
+
 MObject FlStandardSurfaceShader::sheenColor;
 MObject FlStandardSurfaceShader::sheenWeight;
 MObject FlStandardSurfaceShader::sheenRoughness;
@@ -164,6 +167,17 @@ MStatus FlStandardSurfaceShader::initialize()
     CHECK_MSTATUS(numAttr.setMax(1));
 
     sheenRoughness = numAttr.create("sheenRoughness", "shroughness", MFnNumericData::kFloat);
+    MAKE_INPUT(numAttr);
+    CHECK_MSTATUS(numAttr.setDefault(0));
+    CHECK_MSTATUS(numAttr.setMin(0));
+    CHECK_MSTATUS(numAttr.setMax(1));
+
+    /** TRANSMISSION **/
+    transmissionColor = numAttr.createColor("transmissionColor", "ttcolor", &status);
+    MAKE_INPUT(numAttr);
+    CHECK_MSTATUS(numAttr.setDefault(1.f, 1.f, 1.f));
+
+    transmissionWeight = numAttr.create("transmissionWeight", "ttweight", MFnNumericData::kFloat);
     MAKE_INPUT(numAttr);
     CHECK_MSTATUS(numAttr.setDefault(0));
     CHECK_MSTATUS(numAttr.setMin(0));
@@ -347,6 +361,9 @@ MStatus FlStandardSurfaceShader::initialize()
     CHECK_MSTATUS(addAttribute(sheenWeight));
     CHECK_MSTATUS(addAttribute(sheenRoughness));
 
+    CHECK_MSTATUS(addAttribute(transmissionColor));
+    CHECK_MSTATUS(addAttribute(transmissionWeight));
+
     CHECK_MSTATUS(addAttribute(aOutColor));
 
     CHECK_MSTATUS(addAttribute(aNormalCamera));
@@ -370,6 +387,9 @@ MStatus FlStandardSurfaceShader::initialize()
     CHECK_MSTATUS(attributeAffects(sheenColor, aOutColor));
     CHECK_MSTATUS(attributeAffects(sheenWeight, aOutColor));
     CHECK_MSTATUS(attributeAffects(sheenRoughness, aOutColor));
+
+    CHECK_MSTATUS(attributeAffects(transmissionColor, aOutColor));
+    CHECK_MSTATUS(attributeAffects(transmissionWeight, aOutColor));
 
     CHECK_MSTATUS(attributeAffects(aLightIntensityR, aOutColor));
     CHECK_MSTATUS(attributeAffects(aLightIntensityB, aOutColor));

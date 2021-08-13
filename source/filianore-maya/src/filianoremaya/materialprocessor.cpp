@@ -97,12 +97,23 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
         std::shared_ptr<Texture<PrincipalSpectrum>> sheenColorTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(sheenColor);
         std::shared_ptr<Texture<float>> sheenRoughnessTex = std::make_shared<ConstantTexture<float>>(mSheenRoughness);
 
+        // Transmission
+        MPlug mTransmissionColorPlug(mShaderObject, FlStandardSurfaceShader::transmissionColor);
+        MFloatVector mTransmissionColor = mTransmissionColorPlug.asMDataHandle().asFloatVector();
+
+        MPlug mTransmissionWeightPlug(mShaderObject, FlStandardSurfaceShader::transmissionWeight);
+        float mTransmissionWeight = mTransmissionWeightPlug.asMDataHandle().asFloat();
+
+        PrincipalSpectrum transmissionColor = FromReflectanceRGB(StaticArray<float, 3>(mTransmissionColor.x, mTransmissionColor.y, mTransmissionColor.z));
+        std::shared_ptr<Texture<PrincipalSpectrum>> transmissionColorTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(transmissionColor);
+
         // Actual Material
         std::shared_ptr<Material> standardSurfaceMaterial = std::make_shared<StandardSurfaceMaterial>(
             mDiffuseWeight, diffuseColorTex, diffuseRoughnessTex,
             mMetallicWeight,
             mSpecWeight, specColorTex, specRoughnessTex, specAnisotropicTex, mSpecIOR,
-            mSheenWeight, sheenColorTex, sheenRoughnessTex);
+            mSheenWeight, sheenColorTex, sheenRoughnessTex,
+            mTransmissionWeight, transmissionColorTex);
 
         return standardSurfaceMaterial;
     }

@@ -43,6 +43,10 @@ public:
     static MObject sheenWeight;
     static MObject sheenRoughness;
 
+    // Transmission
+    static MObject transmissionColor;
+    static MObject transmissionWeight;
+
     static MObject aOutColorR;
     static MObject aOutColorG;
     static MObject aOutColorB;
