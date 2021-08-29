@@ -33,6 +33,14 @@ MObject FlStandardSurfaceShader::sheenColor;
 MObject FlStandardSurfaceShader::sheenWeight;
 MObject FlStandardSurfaceShader::sheenRoughness;
 
+MObject FlStandardSurfaceShader::clearcoatColor;
+MObject FlStandardSurfaceShader::clearcoatWeight;
+MObject FlStandardSurfaceShader::clearcoatGloss;
+MObject FlStandardSurfaceShader::clearcoatIOR;
+
+MObject FlStandardSurfaceShader::thinFilmThickness;
+MObject FlStandardSurfaceShader::thinFilmIOR;
+
 MObject FlStandardSurfaceShader::aOutColor;
 MObject FlStandardSurfaceShader::aOutColorR;
 MObject FlStandardSurfaceShader::aOutColorG;
@@ -97,7 +105,7 @@ MStatus FlStandardSurfaceShader::initialize()
     nameAttr = typedAttr.create("materialName", "mn", MFnData::kString, nameData, &status);
     CHECK_MSTATUS(typedAttr.setWritable(false));
 
-    /** FOUNDATION DIFFUSE **/
+    /** DIFFUSE **/
     diffuseBaseColor = numAttr.createColor("color", "dfcolor", &status);
     MAKE_INPUT(numAttr);
     CHECK_MSTATUS(numAttr.setDefault(0.6f, 0.6f, 0.6f));
@@ -182,6 +190,42 @@ MStatus FlStandardSurfaceShader::initialize()
     CHECK_MSTATUS(numAttr.setDefault(0));
     CHECK_MSTATUS(numAttr.setMin(0));
     CHECK_MSTATUS(numAttr.setMax(1));
+
+    /** CLEARCOAT **/
+    clearcoatColor = numAttr.createColor("clearcoatColor", "clrcolor", &status);
+    MAKE_INPUT(numAttr);
+    CHECK_MSTATUS(numAttr.setDefault(1.f, 1.f, 1.f));
+
+    clearcoatWeight = numAttr.create("clearcoatWeight", "clrweight", MFnNumericData::kFloat);
+    MAKE_INPUT(numAttr);
+    CHECK_MSTATUS(numAttr.setDefault(0));
+    CHECK_MSTATUS(numAttr.setMin(0));
+    CHECK_MSTATUS(numAttr.setMax(1));
+
+    clearcoatGloss = numAttr.create("clearcoatGloss", "clrgloss", MFnNumericData::kFloat);
+    MAKE_INPUT(numAttr);
+    CHECK_MSTATUS(numAttr.setDefault(1));
+    CHECK_MSTATUS(numAttr.setMin(0));
+    CHECK_MSTATUS(numAttr.setMax(1));
+
+    clearcoatIOR = numAttr.create("clearcoatIOR", "clrior", MFnNumericData::kFloat);
+    MAKE_INPUT(numAttr);
+    CHECK_MSTATUS(numAttr.setDefault(1.50));
+    CHECK_MSTATUS(numAttr.setMin(0));
+    CHECK_MSTATUS(numAttr.setMax(10));
+
+    /** THIN FILM **/
+    thinFilmThickness = numAttr.create("thinFilmThickness", "tfThickness", MFnNumericData::kFloat);
+    MAKE_INPUT(numAttr);
+    CHECK_MSTATUS(numAttr.setDefault(0));
+    CHECK_MSTATUS(numAttr.setMin(0));
+    CHECK_MSTATUS(numAttr.setMax(3000));
+
+    thinFilmIOR = numAttr.create("thinFilmIOR", "tfIOR", MFnNumericData::kFloat);
+    MAKE_INPUT(numAttr);
+    CHECK_MSTATUS(numAttr.setDefault(1.50));
+    CHECK_MSTATUS(numAttr.setMin(0));
+    CHECK_MSTATUS(numAttr.setMax(10));
 
     /** OUT COLOR **/
     aOutColorR = numAttr.create("outColorR", "ocr", MFnNumericData::kFloat, 0, &status);
@@ -364,6 +408,14 @@ MStatus FlStandardSurfaceShader::initialize()
     CHECK_MSTATUS(addAttribute(transmissionColor));
     CHECK_MSTATUS(addAttribute(transmissionWeight));
 
+    CHECK_MSTATUS(addAttribute(clearcoatColor));
+    CHECK_MSTATUS(addAttribute(clearcoatWeight));
+    CHECK_MSTATUS(addAttribute(clearcoatGloss));
+    CHECK_MSTATUS(addAttribute(clearcoatIOR));
+
+    CHECK_MSTATUS(addAttribute(thinFilmThickness));
+    CHECK_MSTATUS(addAttribute(thinFilmIOR));
+
     CHECK_MSTATUS(addAttribute(aOutColor));
 
     CHECK_MSTATUS(addAttribute(aNormalCamera));
@@ -390,6 +442,14 @@ MStatus FlStandardSurfaceShader::initialize()
 
     CHECK_MSTATUS(attributeAffects(transmissionColor, aOutColor));
     CHECK_MSTATUS(attributeAffects(transmissionWeight, aOutColor));
+
+    CHECK_MSTATUS(attributeAffects(clearcoatColor, aOutColor));
+    CHECK_MSTATUS(attributeAffects(clearcoatWeight, aOutColor));
+    CHECK_MSTATUS(attributeAffects(clearcoatGloss, aOutColor));
+    CHECK_MSTATUS(attributeAffects(clearcoatIOR, aOutColor));
+
+    CHECK_MSTATUS(attributeAffects(thinFilmThickness, aOutColor));
+    CHECK_MSTATUS(attributeAffects(thinFilmIOR, aOutColor));
 
     CHECK_MSTATUS(attributeAffects(aLightIntensityR, aOutColor));
     CHECK_MSTATUS(attributeAffects(aLightIntensityB, aOutColor));

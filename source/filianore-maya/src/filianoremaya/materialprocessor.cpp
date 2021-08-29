@@ -107,13 +107,38 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
         PrincipalSpectrum transmissionColor = FromReflectanceRGB(StaticArray<float, 3>(mTransmissionColor.x, mTransmissionColor.y, mTransmissionColor.z));
         std::shared_ptr<Texture<PrincipalSpectrum>> transmissionColorTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(transmissionColor);
 
+        // Clearcoat
+        MPlug mClearcoatColorPlug(mShaderObject, FlStandardSurfaceShader::clearcoatColor);
+        MFloatVector mClearcoatColor = mClearcoatColorPlug.asMDataHandle().asFloatVector();
+
+        MPlug mClearcoatWeightPlug(mShaderObject, FlStandardSurfaceShader::clearcoatWeight);
+        float mClearcoatWeight = mClearcoatWeightPlug.asMDataHandle().asFloat();
+
+        MPlug mClearcoatGlossPlug(mShaderObject, FlStandardSurfaceShader::clearcoatGloss);
+        float mClearcoatGloss = mClearcoatGlossPlug.asMDataHandle().asFloat();
+
+        MPlug mClearcoatIORPlug(mShaderObject, FlStandardSurfaceShader::clearcoatIOR);
+        float mClearcoatIOR = mClearcoatIORPlug.asMDataHandle().asFloat();
+
+        PrincipalSpectrum clearcoatColor = FromReflectanceRGB(StaticArray<float, 3>(mClearcoatColor.x, mClearcoatColor.y, mClearcoatColor.z));
+        std::shared_ptr<Texture<PrincipalSpectrum>> clearcoatColorTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(clearcoatColor);
+
+        // Thin Film
+        MPlug mThinFilmThicknessPlug(mShaderObject, FlStandardSurfaceShader::thinFilmThickness);
+        float mThinFilmThickness = mThinFilmThicknessPlug.asMDataHandle().asFloat();
+
+        MPlug mThinFilmIORPlug(mShaderObject, FlStandardSurfaceShader::thinFilmIOR);
+        float mThinFilmIOR = mThinFilmIORPlug.asMDataHandle().asFloat();
+
         // Actual Material
         std::shared_ptr<Material> standardSurfaceMaterial = std::make_shared<StandardSurfaceMaterial>(
             mDiffuseWeight, diffuseColorTex, diffuseRoughnessTex,
             mMetallicWeight,
             mSpecWeight, specColorTex, specRoughnessTex, specAnisotropicTex, mSpecIOR,
             mSheenWeight, sheenColorTex, sheenRoughnessTex,
-            mTransmissionWeight, transmissionColorTex);
+            mTransmissionWeight, transmissionColorTex,
+            mClearcoatWeight, clearcoatColorTex, mClearcoatIOR, mClearcoatGloss,
+            mThinFilmThickness, mThinFilmIOR);
 
         return standardSurfaceMaterial;
     }

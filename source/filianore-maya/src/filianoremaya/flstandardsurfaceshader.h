@@ -47,6 +47,16 @@ public:
     static MObject transmissionColor;
     static MObject transmissionWeight;
 
+    // Clearcoat
+    static MObject clearcoatColor;
+    static MObject clearcoatWeight;
+    static MObject clearcoatGloss;
+    static MObject clearcoatIOR;
+
+    // Thin Film
+    static MObject thinFilmThickness;
+    static MObject thinFilmIOR;
+
     static MObject aOutColorR;
     static MObject aOutColorG;
     static MObject aOutColorB;

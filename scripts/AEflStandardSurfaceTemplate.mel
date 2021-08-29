@@ -4,7 +4,7 @@ global proc AEflStandardSurfaceTemplate(string $nodeName)
     AEswatchDisplay $nodeName;
     editorTemplate -beginScrollLayout;
 
-    editorTemplate -beginLayout "Foundation" -collapse 0;
+    editorTemplate -beginLayout "Diffuse" -collapse 0;
 		editorTemplate -label "Color" -addControl "color";
 		editorTemplate -label "Weight" -addControl "diffuseWeight";
 		editorTemplate -label "Roughness" -addControl "diffuseRoughness";
@@ -23,15 +23,27 @@ global proc AEflStandardSurfaceTemplate(string $nodeName)
 		editorTemplate -label "IOR" -addControl "specularIOR";
 	editorTemplate -endLayout;
 
-	editorTemplate -beginLayout "Sheen" -collapse 0;
+	editorTemplate -beginLayout "Transmission" -collapse 0;
+		editorTemplate -label "Color" -addControl "transmissionColor";
+		editorTemplate -label "Weight" -addControl "transmissionWeight";
+	editorTemplate -endLayout;
+
+	editorTemplate -beginLayout "Sheen" -collapse 1;
 		editorTemplate -label "Color" -addControl "sheenColor";
 		editorTemplate -label "Weight" -addControl "sheenWeight";
 		editorTemplate -label "Roughness" -addControl "sheenRoughness";
 	editorTemplate -endLayout;
 
-	editorTemplate -beginLayout "Transmission" -collapse 0;
-		editorTemplate -label "Color" -addControl "transmissionColor";
-		editorTemplate -label "Weight" -addControl "transmissionWeight";
+	editorTemplate -beginLayout "Clearcoat" -collapse 1;
+		editorTemplate -label "Color" -addControl "clearcoatColor";
+		editorTemplate -label "Weight" -addControl "clearcoatWeight";
+		editorTemplate -label "Gloss" -addControl "clearcoatGloss";
+		editorTemplate -label "IOR" -addControl "clearcoatIOR";
+	editorTemplate -endLayout;
+
+	editorTemplate -beginLayout "Thin Film Inteference" -collapse 1;
+		editorTemplate -label "Thickness" -addControl "thinFilmThickness";
+		editorTemplate -label "IOR" -addControl "thinFilmIOR";
 	editorTemplate -endLayout;
 
 	// include/call base class/node attributes
