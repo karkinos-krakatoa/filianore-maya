@@ -27,15 +27,13 @@ public:
     static MObject diffuseBaseWeight;
     static MObject diffuseBaseRoughness;
 
-    // Metallurgy
-    static MObject metallicPreset;
-    static MObject metallicWeight;
-
     // Specular
     static MObject specularColor;
     static MObject specularWeight;
     static MObject specularRoughness;
     static MObject specularAnisotropic;
+    static MObject specularType;
+    static MObject metallicPreset;
     static MObject specularIOR;
 
     // Sheen

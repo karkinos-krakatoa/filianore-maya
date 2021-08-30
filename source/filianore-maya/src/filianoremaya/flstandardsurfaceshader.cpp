@@ -17,14 +17,13 @@ MObject FlStandardSurfaceShader::diffuseBaseColor;
 MObject FlStandardSurfaceShader::diffuseBaseWeight;
 MObject FlStandardSurfaceShader::diffuseBaseRoughness;
 
-MObject FlStandardSurfaceShader::metallicPreset;
-MObject FlStandardSurfaceShader::metallicWeight;
-
 MObject FlStandardSurfaceShader::specularColor;
 MObject FlStandardSurfaceShader::specularWeight;
 MObject FlStandardSurfaceShader::specularRoughness;
 MObject FlStandardSurfaceShader::specularAnisotropic;
+MObject FlStandardSurfaceShader::specularType;
 MObject FlStandardSurfaceShader::specularIOR;
+MObject FlStandardSurfaceShader::metallicPreset;
 
 MObject FlStandardSurfaceShader::transmissionColor;
 MObject FlStandardSurfaceShader::transmissionWeight;
@@ -122,18 +121,6 @@ MStatus FlStandardSurfaceShader::initialize()
     CHECK_MSTATUS(numAttr.setMin(0));
     CHECK_MSTATUS(numAttr.setMax(1));
 
-    /** METALLURGY **/
-    metallicPreset = enumAttr.create("metallicPreset", "mmPreset", 0, &status);
-    MAKE_INPUT(enumAttr);
-    CHECK_MSTATUS(enumAttr.addField("Gold", 0));
-    CHECK_MSTATUS(enumAttr.addField("Silver", 1));
-
-    metallicWeight = numAttr.create("metallicWeight", "mmWeight", MFnNumericData::kFloat);
-    MAKE_INPUT(numAttr);
-    CHECK_MSTATUS(numAttr.setDefault(0));
-    CHECK_MSTATUS(numAttr.setMin(0));
-    CHECK_MSTATUS(numAttr.setMax(1));
-
     /** SPECULAR **/
     specularColor = numAttr.createColor("specularColor", "speccolor", &status);
     MAKE_INPUT(numAttr);
@@ -157,11 +144,22 @@ MStatus FlStandardSurfaceShader::initialize()
     CHECK_MSTATUS(numAttr.setMin(-1));
     CHECK_MSTATUS(numAttr.setMax(1));
 
+    specularType = enumAttr.create("specularType", "specType", 0, &status);
+    MAKE_INPUT(enumAttr);
+    CHECK_MSTATUS(enumAttr.addField("Dielectric", 0));
+    CHECK_MSTATUS(enumAttr.addField("Metallic", 1));
+    CHECK_MSTATUS(enumAttr.addField("Wavelength-Dependent Metallic", 2));
+
     specularIOR = numAttr.create("specularIOR", "specior", MFnNumericData::kFloat);
     MAKE_INPUT(numAttr);
     CHECK_MSTATUS(numAttr.setDefault(1.50));
     CHECK_MSTATUS(numAttr.setMin(0));
     CHECK_MSTATUS(numAttr.setMax(10));
+
+    metallicPreset = enumAttr.create("metallicPreset", "mmPreset", 0, &status);
+    MAKE_INPUT(enumAttr);
+    CHECK_MSTATUS(enumAttr.addField("Gold", 0));
+    CHECK_MSTATUS(enumAttr.addField("Silver", 1));
 
     /** SHEEN **/
     sheenColor = numAttr.createColor("sheenColor", "shcolor", &status);
@@ -392,14 +390,13 @@ MStatus FlStandardSurfaceShader::initialize()
     CHECK_MSTATUS(addAttribute(diffuseBaseWeight));
     CHECK_MSTATUS(addAttribute(diffuseBaseRoughness));
 
-    CHECK_MSTATUS(addAttribute(metallicPreset));
-    CHECK_MSTATUS(addAttribute(metallicWeight));
-
     CHECK_MSTATUS(addAttribute(specularColor));
     CHECK_MSTATUS(addAttribute(specularWeight));
     CHECK_MSTATUS(addAttribute(specularRoughness));
     CHECK_MSTATUS(addAttribute(specularAnisotropic));
+    CHECK_MSTATUS(addAttribute(specularType));
     CHECK_MSTATUS(addAttribute(specularIOR));
+    CHECK_MSTATUS(addAttribute(metallicPreset));
 
     CHECK_MSTATUS(addAttribute(sheenColor));
     CHECK_MSTATUS(addAttribute(sheenWeight));
@@ -427,14 +424,13 @@ MStatus FlStandardSurfaceShader::initialize()
     CHECK_MSTATUS(attributeAffects(diffuseBaseRoughness, aOutColor));
     CHECK_MSTATUS(attributeAffects(diffuseBaseWeight, aOutColor));
 
-    CHECK_MSTATUS(attributeAffects(metallicPreset, aOutColor));
-    CHECK_MSTATUS(attributeAffects(metallicWeight, aOutColor));
-
     CHECK_MSTATUS(attributeAffects(specularColor, aOutColor));
     CHECK_MSTATUS(attributeAffects(specularRoughness, aOutColor));
     CHECK_MSTATUS(attributeAffects(specularWeight, aOutColor));
     CHECK_MSTATUS(attributeAffects(specularAnisotropic, aOutColor));
+    CHECK_MSTATUS(attributeAffects(specularType, aOutColor));
     CHECK_MSTATUS(attributeAffects(specularIOR, aOutColor));
+    CHECK_MSTATUS(attributeAffects(metallicPreset, aOutColor));
 
     CHECK_MSTATUS(attributeAffects(sheenColor, aOutColor));
     CHECK_MSTATUS(attributeAffects(sheenWeight, aOutColor));

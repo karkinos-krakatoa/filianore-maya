@@ -58,10 +58,6 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
         std::shared_ptr<Texture<PrincipalSpectrum>> diffuseColorTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(diffuseColor);
         std::shared_ptr<Texture<float>> diffuseRoughnessTex = std::make_shared<ConstantTexture<float>>(mDiffuseRoughness);
 
-        // Metallurgy
-        MPlug mMetallicWeightPlug(mShaderObject, FlStandardSurfaceShader::metallicWeight);
-        float mMetallicWeight = mMetallicWeightPlug.asMDataHandle().asFloat();
-
         // Specular
         MPlug mSpecColorPlug(mShaderObject, FlStandardSurfaceShader::specularColor);
         MFloatVector mSpecColor = mSpecColorPlug.asMDataHandle().asFloatVector();
@@ -75,8 +71,14 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
         MPlug mSpecAnisotropicPlug(mShaderObject, FlStandardSurfaceShader::specularAnisotropic);
         float mSpecAnisotropic = mSpecAnisotropicPlug.asMDataHandle().asFloat();
 
+        MPlug mSpecTypePlug(mShaderObject, FlStandardSurfaceShader::specularType);
+        int mSpecType = mSpecTypePlug.asMDataHandle().asInt();
+
         MPlug mSpecIORPlug(mShaderObject, FlStandardSurfaceShader::specularIOR);
         float mSpecIOR = mSpecIORPlug.asMDataHandle().asFloat();
+
+        MPlug mMetallicPresetTypePlug(mShaderObject, FlStandardSurfaceShader::metallicPreset);
+        int mMetallicPreset = mMetallicPresetTypePlug.asMDataHandle().asInt();
 
         PrincipalSpectrum specColor = FromReflectanceRGB(StaticArray<float, 3>(mSpecColor.x, mSpecColor.y, mSpecColor.z));
         std::shared_ptr<Texture<PrincipalSpectrum>> specColorTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(specColor);
@@ -133,8 +135,7 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
         // Actual Material
         std::shared_ptr<Material> standardSurfaceMaterial = std::make_shared<StandardSurfaceMaterial>(
             mDiffuseWeight, diffuseColorTex, diffuseRoughnessTex,
-            mMetallicWeight,
-            mSpecWeight, specColorTex, specRoughnessTex, specAnisotropicTex, mSpecIOR,
+            mSpecWeight, specColorTex, specRoughnessTex, specAnisotropicTex, mSpecType, mSpecIOR, mMetallicPreset,
             mSheenWeight, sheenColorTex, sheenRoughnessTex,
             mTransmissionWeight, transmissionColorTex,
             mClearcoatWeight, clearcoatColorTex, mClearcoatIOR, mClearcoatGloss,

@@ -10,6 +10,7 @@
 #include "finalrendercommand.h"
 
 #include "filianore/color/spectruminits.h"
+#include "filianore/color/metallurgy.h"
 
 #include "util.h"
 
@@ -17,6 +18,7 @@ MStatus initializePlugin(MObject plugin)
 {
 	// Filianore Inits
 	filianore::InitializeSpectrals();
+	filianore::InitializeForge();
 
 	MStatus status;
 	MFnPlugin fnPlugin(plugin, FILIANORE_MAYA_NAME, FILIANORE_MAYA_VERSION);
