@@ -159,7 +159,7 @@ MStatus FlStandardSurfaceShader::initialize()
     metallicPreset = enumAttr.create("metallicPreset", "mmPreset", 0, &status);
     MAKE_INPUT(enumAttr);
     CHECK_MSTATUS(enumAttr.addField("Gold", 0));
-    CHECK_MSTATUS(enumAttr.addField("Silver", 1));
+    CHECK_MSTATUS(enumAttr.addField("Copper", 1));
 
     /** SHEEN **/
     sheenColor = numAttr.createColor("sheenColor", "shcolor", &status);
