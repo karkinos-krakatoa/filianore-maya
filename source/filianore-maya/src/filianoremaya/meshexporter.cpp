@@ -7,18 +7,14 @@
 #include <maya/MPointArray.h>
 #include <maya/MPoint.h>
 #include <maya/MGlobal.h>
+#include <maya/MItMeshPolygon.h>
 
 #include "util.h"
 #include "meshexporter.h"
 #include "materialprocessor.h"
 
-#include "filianore/color/rgb.h"
-
 #include "filianore/shapes/triangle.h"
 #include "filianore/core/primitive.h"
-
-#include "filianore/textures/constant.h"
-#include "filianore/materials/lambert.h"
 
 #include <map>
 
@@ -31,6 +27,8 @@ using TriEntity = TriangleEntity;
 MayaMesh::MayaMesh(MFnMesh &_mesh)
     : name(_mesh.name().asChar())
 {
+    MStatus status;
+
     std::shared_ptr<Material> material = ProcessMeshMaterials(_mesh);
 
     MDagPath mDag;
@@ -40,9 +38,10 @@ MayaMesh::MayaMesh(MFnMesh &_mesh)
         mMatrix = mDag.inclusiveMatrix();
     }
 
+    // Get all Vertices in Mesh
     MPointArray mVertices;
     _mesh.getPoints(mVertices);
-
+    // Parse Maya Vertices to Filianore's
     std::vector<Vec3> vertices;
     vertices.reserve(mVertices.length());
     for (unsigned int i = 0; i < mVertices.length(); i++)
@@ -51,15 +50,9 @@ MayaMesh::MayaMesh(MFnMesh &_mesh)
         vertices.emplace_back(Vec3((float)point.x, (float)point.y, (float)point.z));
     }
 
-    MFloatVectorArray mNormals;
-    _mesh.getNormals(mNormals);
-
-    std::vector<Vec3> normals;
-    normals.reserve(mNormals.length());
-    for (unsigned int i = 0; i < mNormals.length(); i++)
-    {
-        normals.emplace_back(Vec3(mNormals[i].x, mNormals[i].y, mNormals[i].z));
-    }
+    // Get UV sets
+    MStringArray UVsets;
+    status = _mesh.getUVSetNames(UVsets);
 
     MIntArray mTrianglesCount;
     MIntArray mVerticesIndices;
@@ -70,49 +63,24 @@ MayaMesh::MayaMesh(MFnMesh &_mesh)
         MIntArray faceNormalList;
 
         _mesh.getPolygonVertices(polygon, vertexList);
-        _mesh.getFaceNormalIds(polygon, faceNormalList);
-
-        std::map<int, int> verticesToNormals;
-        for (unsigned int i = 0; i < vertexList.length(); ++i)
-        {
-            verticesToNormals.emplace(vertexList[i], faceNormalList[i]);
-        }
 
         for (int i = 0; i < mTrianglesCount[polygon]; ++i)
         {
             MStatus uvGetterStatus;
 
-            Vec2 uv1(0.f, 0.f);
-            Vec2 uv2(1.f, 0.f);
-            Vec2 uv3(1.f, 1.f);
-            float2 uv;
-            MPoint pointForUV = MPoint(0.f, 0.f, 0.f);
-
+            // Get Polygon Vertices
             int vertexIds[3];
             _mesh.getPolygonTriangleVertices(polygon, i, vertexIds);
 
-            Vec3 triV1 = Vec3(vertices[vertexIds[0]]);
-            pointForUV = MPoint(triV1.x(), triV1.y(), triV1.z());
-            _mesh.getUVAtPoint(pointForUV, uv, MSpace::kWorld);
-            uv1 = Vec2(uv[0], uv[1]);
+            // Get Polygon UVs
+            float u1, v1, u2, v2, u3, v3;
+            _mesh.getPolygonUV(polygon, vertexIds[0], u1, v1, &UVsets[0]);
+            _mesh.getPolygonUV(polygon, vertexIds[1], u2, v2, &UVsets[0]);
+            _mesh.getPolygonUV(polygon, vertexIds[2], u3, v3, &UVsets[0]);
 
-            Vec3 triV2 = Vec3(vertices[vertexIds[1]]);
-            pointForUV = MPoint(triV2.x(), triV2.y(), triV2.z());
-            _mesh.getUVAtPoint(pointForUV, uv, MSpace::kWorld);
-            uv2 = Vec2(uv[0], uv[1]);
-
-            Vec3 triV3 = Vec3(vertices[vertexIds[2]]);
-            pointForUV = MPoint(triV3.x(), triV3.y(), triV3.z());
-            _mesh.getUVAtPoint(pointForUV, uv, MSpace::kWorld);
-            uv3 = Vec2(uv[0], uv[1]);
-
-            Vec3 triN1 = Vec3(normals[verticesToNormals[vertexIds[0]]]);
-            Vec3 triN2 = Vec3(normals[verticesToNormals[vertexIds[1]]]);
-            Vec3 triN3 = Vec3(normals[verticesToNormals[vertexIds[2]]]);
-
-            TriEntity t1(triV1, triN1, true, uv1);
-            TriEntity t2(triV2, triN2, true, uv2);
-            TriEntity t3(triV3, triN3, true, uv3);
+            TriEntity t1(vertices[vertexIds[0]], Vec3(), false, Vec2(u1, v1));
+            TriEntity t2(vertices[vertexIds[1]], Vec3(), false, Vec2(u2, v2));
+            TriEntity t3(vertices[vertexIds[2]], Vec3(), false, Vec2(u3, v3));
 
             std::shared_ptr<Shape> triangle = std::make_shared<Triangle>(t1, t2, t3);
             std::shared_ptr<Primitive> primitive = std::make_shared<GeometricPrimitive>(triangle, material, nullptr);

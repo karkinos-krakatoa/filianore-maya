@@ -1,21 +1,71 @@
 #include "materialprocessor.h"
+
+#include <maya/MObjectArray.h>
+#include <maya/MIntArray.h>
+#include <maya/MFnDependencyNode.h>
+#include <maya/MItDependencyGraph.h>
+#include <maya/MPlugArray.h>
+#include <maya/MPlug.h>
+
 #include "util.h"
 
 #include "flstandardsurfaceshader.h"
 #include "flplasticshader.h"
 
-#include <maya/MObjectArray.h>
-#include <maya/MIntArray.h>
-#include <maya/MFnDependencyNode.h>
-#include <maya/MPlug.h>
-
 #include "filianore/textures/constant.h"
+#include "filianore/textures/imagemap.h"
 
 #include "filianore/materials/lambert.h"
 #include "filianore/materials/standardsurface.h"
 
 #include "filianore/color/spectrumoperations.h"
 #include "filianore/color/spectruminits.h"
+
+std::shared_ptr<Texture<PrincipalSpectrum>> GetColorNode(MPlug &mShaderObjectPlug)
+{
+    MStatus status;
+
+    // Default Debug Texture
+    PrincipalSpectrum defaultColor = FromReflectanceRGB(StaticArray<float, 3>(0.f, 1.f, 1.f));
+    auto defaultTexture = std::make_shared<ConstantTexture<PrincipalSpectrum>>(defaultColor);
+
+    MPlugArray connectedPlugs;
+    mShaderObjectPlug.connectedTo(connectedPlugs, true, false);
+    if (connectedPlugs.length() > 0)
+    {
+        MFnDependencyNode fnDN(connectedPlugs[0].node());
+
+        MItDependencyGraph dgIt(mShaderObjectPlug, MFn::kFileTexture, MItDependencyGraph::kUpstream,
+                                MItDependencyGraph::kBreadthFirst, MItDependencyGraph::kNodeLevel, &status);
+        if (status == MS::kFailure)
+        {
+            FILIANORE_MAYA_LOG_INFO("Can't load graph textures");
+            return defaultTexture;
+        }
+
+        dgIt.disablePruningOnFilter();
+        if (dgIt.isDone())
+        {
+            return defaultTexture;
+        }
+
+        MObject textureNode = dgIt.thisNode();
+        MPlug filenamePlug = MFnDependencyNode(textureNode).findPlug("fileTextureName", &status);
+        MString textureName; // name texture + path
+        filenamePlug.getValue(textureName);
+
+        return std::make_shared<ImageMapTexture>(textureName.asChar());
+    }
+    else
+    {
+        // Default Color Node
+        MFloatVector mShaderColor = mShaderObjectPlug.asMDataHandle().asFloatVector();
+        PrincipalSpectrum shaderColor = FromReflectanceRGB(StaticArray<float, 3>(mShaderColor.x, mShaderColor.y, mShaderColor.z));
+        return std::make_shared<ConstantTexture<PrincipalSpectrum>>(shaderColor);
+    }
+
+    return defaultTexture;
+}
 
 std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
 {
@@ -46,7 +96,6 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
     {
         // Foundation
         MPlug mDiffuseColorPlug(mShaderObject, FlStandardSurfaceShader::diffuseBaseColor);
-        MFloatVector mDiffuseColor = mDiffuseColorPlug.asMDataHandle().asFloatVector();
 
         MPlug mDiffuseWeightPlug(mShaderObject, FlStandardSurfaceShader::diffuseBaseWeight);
         float mDiffuseWeight = mDiffuseWeightPlug.asMDataHandle().asFloat();
@@ -54,8 +103,7 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
         MPlug mDiffuseRoughnessPlug(mShaderObject, FlStandardSurfaceShader::diffuseBaseRoughness);
         float mDiffuseRoughness = mDiffuseRoughnessPlug.asMDataHandle().asFloat();
 
-        PrincipalSpectrum diffuseColor = FromReflectanceRGB(StaticArray<float, 3>(mDiffuseColor.x, mDiffuseColor.y, mDiffuseColor.z));
-        std::shared_ptr<Texture<PrincipalSpectrum>> diffuseColorTex = std::make_shared<ConstantTexture<PrincipalSpectrum>>(diffuseColor);
+        std::shared_ptr<Texture<PrincipalSpectrum>> diffuseColorTex = GetColorNode(mDiffuseColorPlug);
         std::shared_ptr<Texture<float>> diffuseRoughnessTex = std::make_shared<ConstantTexture<float>>(mDiffuseRoughness);
 
         // Specular
