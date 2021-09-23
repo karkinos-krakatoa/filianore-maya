@@ -44,7 +44,7 @@ global proc AEflStandardSurfaceTemplate(string $nodeName)
 	editorTemplate -endLayout;
 
 	editorTemplate -beginLayout "Specular" -collapse 0;
-		editorTemplate -label "Color" -addControl "specularColor";
+		editorTemplate -label "Color" -addControl "specColor";
 		editorTemplate -label "Weight" -addControl "specularWeight";
 		editorTemplate -label "Roughness" -addControl "specularRoughness";
 		editorTemplate -label "Anisotropic" -addControl "specularAnisotropic";

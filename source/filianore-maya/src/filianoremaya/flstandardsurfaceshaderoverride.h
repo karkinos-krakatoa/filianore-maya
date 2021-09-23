@@ -18,8 +18,15 @@ public:
     MString primaryColorParameter() const override;
     MString bumpAttribute() const override;
 
+    void updateDG() override;
+    void updateShader(MHWRender::MShaderInstance &shader, const MHWRender::MAttributeParameterMappingList &mappings) override;
+
 private:
     FlStandardSurfaceShaderOverride(const MObject &obj);
+
+    MObject fObject;
+    float fSpecularColor[3];
+    mutable MString fResolvedSpecularColorName;
 };
 
 #endif

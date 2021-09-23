@@ -17,7 +17,7 @@ public:
     {
     }
 
-    MayaMesh(MFnMesh &_mesh);
+    MayaMesh(MFnMesh &_mesh, MObject &mObject);
 
     std::string name;
     std::vector<std::shared_ptr<Primitive>> primitives;

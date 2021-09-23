@@ -55,23 +55,15 @@ public:
     static MObject thinFilmThickness;
     static MObject thinFilmIOR;
 
-    static MObject aOutColorR;
-    static MObject aOutColorG;
-    static MObject aOutColorB;
+    // Outputs
     static MObject aOutColor;
 
-    static MObject aNormalCameraX;
-    static MObject aNormalCameraY;
-    static MObject aNormalCameraZ;
+    // camera
+    static MObject aPointCamera;
     static MObject aNormalCamera;
 
-    static MObject aLightDirectionX;
-    static MObject aLightDirectionY;
-    static MObject aLightDirectionZ;
+    // Light Params
     static MObject aLightDirection;
-    static MObject aLightIntensityR;
-    static MObject aLightIntensityG;
-    static MObject aLightIntensityB;
     static MObject aLightIntensity;
     static MObject aLightAmbient;
     static MObject aLightDiffuse;
@@ -80,6 +72,14 @@ public:
     static MObject aPreShadowIntensity;
     static MObject aLightBlindData;
     static MObject aLightData;
+
+    static MObject aRayOrigin;
+    static MObject aRayDirection;
+
+    static MObject aObjectId;
+    static MObject aRaySampler;
+    static MObject aRayDepth;
+    static MObject aTriangleNormalCamera;
 };
 
 #endif

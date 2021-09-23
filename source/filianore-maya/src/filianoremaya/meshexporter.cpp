@@ -20,11 +20,9 @@
 
 using namespace filianore;
 
-using Vec3 = StaticArray<float, 3>;
-using Vec2 = StaticArray<float, 2>;
 using TriEntity = TriangleEntity;
 
-MayaMesh::MayaMesh(MFnMesh &_mesh)
+MayaMesh::MayaMesh(MFnMesh &_mesh, MObject &mObject)
     : name(_mesh.name().asChar())
 {
     MStatus status;
@@ -38,54 +36,79 @@ MayaMesh::MayaMesh(MFnMesh &_mesh)
         mMatrix = mDag.inclusiveMatrix();
     }
 
-    // Get all Vertices in Mesh
-    MPointArray mVertices;
-    _mesh.getPoints(mVertices);
-    // Parse Maya Vertices to Filianore's
-    std::vector<Vec3> vertices;
-    vertices.reserve(mVertices.length());
-    for (unsigned int i = 0; i < mVertices.length(); i++)
+    MItMeshPolygon faceIt(mDag);
+
+    MFloatArray uArray, vArray;
+    _mesh.getUVs(uArray, vArray);
+
+    uint numUvs = uArray.length();
+    if (numUvs == 0)
     {
-        MPoint point = mVertices[i] * mMatrix;
-        vertices.emplace_back(Vec3((float)point.x, (float)point.y, (float)point.z));
+        uArray.append(0.0);
+        vArray.append(0.0);
     }
 
-    // Get UV sets
-    MStringArray UVsets;
-    status = _mesh.getUVSetNames(UVsets);
+    MPointArray triPoints;
+    MIntArray triVtxIds;
+    MIntArray faceVtxIds;
 
-    MIntArray mTrianglesCount;
-    MIntArray mVerticesIndices;
-    _mesh.getTriangles(mTrianglesCount, mVerticesIndices);
-    for (int polygon = 0; polygon < _mesh.numPolygons(); ++polygon)
+    for (faceIt.reset(); !faceIt.isDone(); faceIt.next())
     {
-        MIntArray vertexList;
-        MIntArray faceNormalList;
+        int faceId = faceIt.index();
+        int numTris;
+        faceIt.numTriangles(numTris);
+        faceIt.getVertices(faceVtxIds);
 
-        _mesh.getPolygonVertices(polygon, vertexList);
-
-        for (int i = 0; i < mTrianglesCount[polygon]; ++i)
+        MIntArray faceUVIndices;
+        for (uint vtxId = 0; vtxId < faceVtxIds.length(); vtxId++)
         {
-            MStatus uvGetterStatus;
+            int uvIndex;
+            if (numUvs == 0)
+            {
+                faceUVIndices.append(0);
+            }
+            else
+            {
+                faceIt.getUVIndex(vtxId, uvIndex);
+                faceUVIndices.append(uvIndex);
+            }
+        }
 
-            // Get Polygon Vertices
-            int vertexIds[3];
-            _mesh.getPolygonTriangleVertices(polygon, i, vertexIds);
+        for (int triId = 0; triId < numTris; triId++)
+        {
+            int faceRelIds[3];
+            faceIt.getTriangle(triId, triPoints, triVtxIds);
 
-            // Get Polygon UVs
-            float u1, v1, u2, v2, u3, v3;
-            _mesh.getPolygonUV(polygon, vertexIds[0], u1, v1, &UVsets[0]);
-            _mesh.getPolygonUV(polygon, vertexIds[1], u2, v2, &UVsets[0]);
-            _mesh.getPolygonUV(polygon, vertexIds[2], u3, v3, &UVsets[0]);
+            for (uint triVtxId = 0; triVtxId < 3; triVtxId++)
+            {
+                for (uint faceVtxId = 0; faceVtxId < faceVtxIds.length(); faceVtxId++)
+                {
+                    if (faceVtxIds[faceVtxId] == triVtxIds[triVtxId])
+                    {
+                        faceRelIds[triVtxId] = faceVtxId;
+                    }
+                }
+            }
 
-            TriEntity t1(vertices[vertexIds[0]], Vec3(), false, Vec2(u1, v1));
-            TriEntity t2(vertices[vertexIds[1]], Vec3(), false, Vec2(u2, v2));
-            TriEntity t3(vertices[vertexIds[2]], Vec3(), false, Vec2(u3, v3));
+            uint uvId0 = faceUVIndices[faceRelIds[0]];
+            uint uvId1 = faceUVIndices[faceRelIds[1]];
+            uint uvId2 = faceUVIndices[faceRelIds[2]];
+
+            MPoint p1 = triPoints[0] * mMatrix;
+            StaticArray<float, 3> vtx1 = StaticArray<float, 3>((float)p1.x, (float)p1.y, (float)p1.z);
+            MPoint p2 = triPoints[1] * mMatrix;
+            StaticArray<float, 3> vtx2 = StaticArray<float, 3>((float)p2.x, (float)p2.y, (float)p2.z);
+            MPoint p3 = triPoints[2] * mMatrix;
+            StaticArray<float, 3> vtx3 = StaticArray<float, 3>((float)p3.x, (float)p3.y, (float)p3.z);
+
+            TriEntity t1(vtx1, StaticArray<float, 3>(), false, StaticArray<float, 2>(uArray[uvId0], vArray[uvId0]));
+            TriEntity t2(vtx2, StaticArray<float, 3>(), false, StaticArray<float, 2>(uArray[uvId1], vArray[uvId1]));
+            TriEntity t3(vtx3, StaticArray<float, 3>(), false, StaticArray<float, 2>(uArray[uvId2], vArray[uvId2]));
 
             std::shared_ptr<Shape> triangle = std::make_shared<Triangle>(t1, t2, t3);
-            std::shared_ptr<Primitive> primitive = std::make_shared<GeometricPrimitive>(triangle, material, nullptr);
+            std::shared_ptr<Primitive> prim = std::make_shared<GeometricPrimitive>(triangle, material, nullptr);
 
-            primitives.emplace_back(primitive);
+            primitives.emplace_back(prim);
         }
     }
 }
@@ -101,7 +124,7 @@ std::vector<std::shared_ptr<Primitive>> MeshExporter::ExportPrimitives()
         if (obj.apiType() == MFn::kMesh)
         {
             MFnMesh mesh(obj);
-            MayaMesh mMesh(mesh);
+            MayaMesh mMesh(mesh, obj);
 
             std::vector<std::shared_ptr<Primitive>> primitivesFromMesh = mMesh.primitives;
 

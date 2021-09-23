@@ -49,8 +49,8 @@ std::shared_ptr<Texture<PrincipalSpectrum>> GetColorNode(MPlug &mShaderObjectPlu
             return defaultTexture;
         }
 
-        MObject textureNode = dgIt.thisNode();
-        MPlug filenamePlug = MFnDependencyNode(textureNode).findPlug("fileTextureName", &status);
+        MObject textureNode = dgIt.currentItem();
+        MPlug filenamePlug = MFnDependencyNode(textureNode).findPlug("fileTextureName", true, &status);
         MString textureName; // name texture + path
         filenamePlug.getValue(textureName);
 

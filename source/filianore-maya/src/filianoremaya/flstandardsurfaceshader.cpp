@@ -6,6 +6,7 @@
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MFnEnumAttribute.h>
 #include <maya/MFnLightDataAttribute.h>
+#include <maya/MRenderUtil.h>
 
 const MString FlStandardSurfaceShader::name("flStandardSurface");
 const MTypeId FlStandardSurfaceShader::id(0x00132b44);
@@ -41,29 +42,27 @@ MObject FlStandardSurfaceShader::thinFilmThickness;
 MObject FlStandardSurfaceShader::thinFilmIOR;
 
 MObject FlStandardSurfaceShader::aOutColor;
-MObject FlStandardSurfaceShader::aOutColorR;
-MObject FlStandardSurfaceShader::aOutColorG;
-MObject FlStandardSurfaceShader::aOutColorB;
 
+MObject FlStandardSurfaceShader::aPointCamera;
 MObject FlStandardSurfaceShader::aNormalCamera;
-MObject FlStandardSurfaceShader::aNormalCameraX;
-MObject FlStandardSurfaceShader::aNormalCameraY;
-MObject FlStandardSurfaceShader::aNormalCameraZ;
+
 MObject FlStandardSurfaceShader::aLightData;
 MObject FlStandardSurfaceShader::aLightDirection;
-MObject FlStandardSurfaceShader::aLightDirectionX;
-MObject FlStandardSurfaceShader::aLightDirectionY;
-MObject FlStandardSurfaceShader::aLightDirectionZ;
 MObject FlStandardSurfaceShader::aLightIntensity;
-MObject FlStandardSurfaceShader::aLightIntensityR;
-MObject FlStandardSurfaceShader::aLightIntensityG;
-MObject FlStandardSurfaceShader::aLightIntensityB;
 MObject FlStandardSurfaceShader::aLightAmbient;
 MObject FlStandardSurfaceShader::aLightDiffuse;
 MObject FlStandardSurfaceShader::aLightSpecular;
 MObject FlStandardSurfaceShader::aLightShadowFraction;
 MObject FlStandardSurfaceShader::aPreShadowIntensity;
 MObject FlStandardSurfaceShader::aLightBlindData;
+
+MObject FlStandardSurfaceShader::aRayDirection;
+MObject FlStandardSurfaceShader::aRayOrigin;
+
+MObject FlStandardSurfaceShader::aObjectId;
+MObject FlStandardSurfaceShader::aRaySampler;
+MObject FlStandardSurfaceShader::aRayDepth;
+MObject FlStandardSurfaceShader::aTriangleNormalCamera;
 
 #define MAKE_INPUT(attr)                   \
     CHECK_MSTATUS(attr.setKeyable(true));  \
@@ -122,7 +121,7 @@ MStatus FlStandardSurfaceShader::initialize()
     CHECK_MSTATUS(numAttr.setMax(1));
 
     /** SPECULAR **/
-    specularColor = numAttr.createColor("specularColor", "speccolor", &status);
+    specularColor = numAttr.createColor("specColor", "speccolor", &status);
     MAKE_INPUT(numAttr);
     CHECK_MSTATUS(numAttr.setDefault(1.f, 1.f, 1.f));
 
@@ -226,66 +225,67 @@ MStatus FlStandardSurfaceShader::initialize()
     CHECK_MSTATUS(numAttr.setMax(10));
 
     /** OUT COLOR **/
-    aOutColorR = numAttr.create("outColorR", "ocr", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
-    aOutColorG = numAttr.create("outColorG", "ocg", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
-    aOutColorB = numAttr.create("outColorB", "ocb", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
-    aOutColor = numAttr.create("outColor", "oc", aOutColorR, aOutColorG, aOutColorB, &status);
+    aOutColor = numAttr.createColor("outColor", "oc");
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setHidden(false));
     CHECK_MSTATUS(numAttr.setReadable(true));
     CHECK_MSTATUS(numAttr.setWritable(false));
 
     /** CAMERA NORMALS **/
-    aNormalCameraX = numAttr.create("normalCameraX", "nx", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
-    CHECK_MSTATUS(numAttr.setStorable(false));
-    CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
-    aNormalCameraY = numAttr.create("normalCameraY", "ny", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
-    CHECK_MSTATUS(numAttr.setStorable(false));
-    CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
-    aNormalCameraZ = numAttr.create("normalCameraZ", "nz", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
-    CHECK_MSTATUS(numAttr.setStorable(false));
-    CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
-    aNormalCamera = numAttr.create("normalCamera", "n", aNormalCameraX, aNormalCameraY, aNormalCameraZ, &status);
+    aPointCamera = numAttr.createPoint("pointCamera", "pc");
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
     CHECK_MSTATUS(numAttr.setDefault(1.0f, 1.0f, 1.0f));
     CHECK_MSTATUS(numAttr.setHidden(true));
 
-    /** LIGHT DIRECTION **/
-    aLightDirectionX = numAttr.create("lightDirectionX", "ldx", MFnNumericData::kFloat, 0, &status);
+    aNormalCamera = numAttr.createPoint("normalCamera", "nc");
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
+    CHECK_MSTATUS(numAttr.setDefault(1.0f, 1.0f, 1.0f));
     CHECK_MSTATUS(numAttr.setHidden(true));
-    CHECK_MSTATUS(numAttr.setReadable(true));
-    CHECK_MSTATUS(numAttr.setWritable(false));
-    CHECK_MSTATUS(numAttr.setDefault(1.0f));
 
-    aLightDirectionY = numAttr.create("lightDirectionY", "ldy", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
+    aTriangleNormalCamera = numAttr.createPoint("triangleNormalCamera", "tn");
+    MAKE_INPUT(numAttr);
+    CHECK_MSTATUS(numAttr.setDefault(1.0f, 1.0f, 1.0f));
+    CHECK_MSTATUS(numAttr.setHidden(true));
+
+    /** RAY **/
+    MObject RayX = numAttr.create("rayOx", "rxo", MFnNumericData::kFloat, 0.0);
+    MObject RayY = numAttr.create("rayOy", "ryo", MFnNumericData::kFloat, 0.0);
+    MObject RayZ = numAttr.create("rayOz", "rzo", MFnNumericData::kFloat, 0.0);
+    aRayOrigin = numAttr.create("rayOrigin", "rog", RayX, RayY, RayZ);
     CHECK_MSTATUS(numAttr.setStorable(false));
     CHECK_MSTATUS(numAttr.setHidden(true));
-    CHECK_MSTATUS(numAttr.setReadable(true));
-    CHECK_MSTATUS(numAttr.setWritable(false));
-    CHECK_MSTATUS(numAttr.setDefault(1.0f));
+    CHECK_MSTATUS(numAttr.setReadable(false));
 
-    aLightDirectionZ = numAttr.create("lightDirectionZ", "ldz", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
+    RayX = numAttr.create("rayDirectionX", "rdx", MFnNumericData::kFloat, 1.0);
+    RayY = numAttr.create("rayDirectionY", "rdy", MFnNumericData::kFloat, 0.0);
+    RayZ = numAttr.create("rayDirectionZ", "rdz", MFnNumericData::kFloat, 0.0);
+    aRayDirection = numAttr.create("rayDirection", "rad", RayX, RayY, RayZ);
     CHECK_MSTATUS(numAttr.setStorable(false));
     CHECK_MSTATUS(numAttr.setHidden(true));
-    CHECK_MSTATUS(numAttr.setReadable(true));
-    CHECK_MSTATUS(numAttr.setWritable(false));
-    CHECK_MSTATUS(numAttr.setDefault(1.0f));
+    CHECK_MSTATUS(numAttr.setReadable(false));
 
-    aLightDirection = numAttr.create("lightDirection", "ld", aLightDirectionX, aLightDirectionY, aLightDirectionZ, &status);
+    // objectId
+    aObjectId = numAttr.createAddr("objectId", "oi");
+    CHECK_MSTATUS(numAttr.setStorable(false));
+    CHECK_MSTATUS(numAttr.setHidden(true));
+    CHECK_MSTATUS(numAttr.setReadable(false));
+
+    // raySampler
+    aRaySampler = numAttr.createAddr("raySampler", "rtr");
+    CHECK_MSTATUS(numAttr.setStorable(false));
+    CHECK_MSTATUS(numAttr.setHidden(true));
+    CHECK_MSTATUS(numAttr.setReadable(false));
+
+    // rayDepth
+    aRayDepth = numAttr.create("rayDepth", "rd", MFnNumericData::kShort, 0.0);
+    CHECK_MSTATUS(numAttr.setStorable(false));
+    CHECK_MSTATUS(numAttr.setHidden(true));
+    CHECK_MSTATUS(numAttr.setReadable(false));
+
+    /** LIGHT PARAMS **/
+    aLightDirection = numAttr.createPoint("lightDirection", "ld");
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
     CHECK_MSTATUS(numAttr.setHidden(true));
@@ -293,32 +293,7 @@ MStatus FlStandardSurfaceShader::initialize()
     CHECK_MSTATUS(numAttr.setWritable(false));
     CHECK_MSTATUS(numAttr.setDefault(1.0f, 1.0f, 1.0f));
 
-    /** LIGHT INTENSITY **/
-    aLightIntensityR = numAttr.create("lightIntensityR", "lir", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
-    CHECK_MSTATUS(numAttr.setStorable(false));
-    CHECK_MSTATUS(numAttr.setHidden(true));
-    CHECK_MSTATUS(numAttr.setReadable(true));
-    CHECK_MSTATUS(numAttr.setWritable(false));
-    CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
-    aLightIntensityG = numAttr.create("lightIntensityG", "lig", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
-    CHECK_MSTATUS(numAttr.setStorable(false));
-    CHECK_MSTATUS(numAttr.setHidden(true));
-    CHECK_MSTATUS(numAttr.setReadable(true));
-    CHECK_MSTATUS(numAttr.setWritable(false));
-    CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
-    aLightIntensityB = numAttr.create("lightIntensityB", "lib", MFnNumericData::kFloat, 0, &status);
-    CHECK_MSTATUS(status);
-    CHECK_MSTATUS(numAttr.setStorable(false));
-    CHECK_MSTATUS(numAttr.setHidden(true));
-    CHECK_MSTATUS(numAttr.setReadable(true));
-    CHECK_MSTATUS(numAttr.setWritable(false));
-    CHECK_MSTATUS(numAttr.setDefault(1.0f));
-
-    aLightIntensity = numAttr.create("lightIntensity", "li", aLightIntensityR, aLightIntensityG, aLightIntensityB, &status);
+    aLightIntensity = numAttr.createColor("lightIntensity", "li");
     CHECK_MSTATUS(status);
     CHECK_MSTATUS(numAttr.setStorable(false));
     CHECK_MSTATUS(numAttr.setHidden(true));
@@ -382,7 +357,7 @@ MStatus FlStandardSurfaceShader::initialize()
     CHECK_MSTATUS(lAttr.setArray(true));
     CHECK_MSTATUS(lAttr.setStorable(false));
     CHECK_MSTATUS(lAttr.setHidden(true));
-    CHECK_MSTATUS(lAttr.setDefault(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, true, true, false, 1.0f, 1.0f, NULL));
+    CHECK_MSTATUS(lAttr.setDefault(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, true, true, false, 0.0f, 1.0f, NULL));
 
     CHECK_MSTATUS(addAttribute(nameAttr));
 
@@ -415,7 +390,16 @@ MStatus FlStandardSurfaceShader::initialize()
 
     CHECK_MSTATUS(addAttribute(aOutColor));
 
+    CHECK_MSTATUS(addAttribute(aPointCamera));
     CHECK_MSTATUS(addAttribute(aNormalCamera));
+    CHECK_MSTATUS(addAttribute(aTriangleNormalCamera));
+
+    CHECK_MSTATUS(addAttribute(aRayOrigin));
+    CHECK_MSTATUS(addAttribute(aRayDirection));
+
+    CHECK_MSTATUS(addAttribute(aObjectId));
+    CHECK_MSTATUS(addAttribute(aRaySampler));
+    CHECK_MSTATUS(addAttribute(aRayDepth));
 
     CHECK_MSTATUS(addAttribute(aLightData));
 
@@ -447,17 +431,13 @@ MStatus FlStandardSurfaceShader::initialize()
     CHECK_MSTATUS(attributeAffects(thinFilmThickness, aOutColor));
     CHECK_MSTATUS(attributeAffects(thinFilmIOR, aOutColor));
 
-    CHECK_MSTATUS(attributeAffects(aLightIntensityR, aOutColor));
-    CHECK_MSTATUS(attributeAffects(aLightIntensityB, aOutColor));
-    CHECK_MSTATUS(attributeAffects(aLightIntensityG, aOutColor));
-    CHECK_MSTATUS(attributeAffects(aLightIntensity, aOutColor));
-    CHECK_MSTATUS(attributeAffects(aNormalCameraX, aOutColor));
-    CHECK_MSTATUS(attributeAffects(aNormalCameraY, aOutColor));
-    CHECK_MSTATUS(attributeAffects(aNormalCameraZ, aOutColor));
+    CHECK_MSTATUS(attributeAffects(aPointCamera, aOutColor));
     CHECK_MSTATUS(attributeAffects(aNormalCamera, aOutColor));
-    CHECK_MSTATUS(attributeAffects(aLightDirectionX, aOutColor));
-    CHECK_MSTATUS(attributeAffects(aLightDirectionY, aOutColor));
-    CHECK_MSTATUS(attributeAffects(aLightDirectionZ, aOutColor));
+
+    CHECK_MSTATUS(attributeAffects(aRayOrigin, aOutColor));
+    CHECK_MSTATUS(attributeAffects(aRayDirection, aOutColor));
+
+    CHECK_MSTATUS(attributeAffects(aLightIntensity, aOutColor));
     CHECK_MSTATUS(attributeAffects(aLightDirection, aOutColor));
     CHECK_MSTATUS(attributeAffects(aLightAmbient, aOutColor));
     CHECK_MSTATUS(attributeAffects(aLightSpecular, aOutColor));
@@ -472,81 +452,201 @@ MStatus FlStandardSurfaceShader::initialize()
 
 MStatus FlStandardSurfaceShader::compute(const MPlug &plug, MDataBlock &block)
 {
-    if (plug == aOutColorR || plug == aOutColorG || plug == aOutColorB || plug == aOutColor)
+    if ((plug != aOutColor) && (plug.parent() != aOutColor))
+        return MS::kUnknownParameter;
+
+    MFloatVector resultColor(0.0, 0.0, 0.0);
+
+    // get sample surface shading parameters
+    MFloatVector &surfaceNormal = block.inputValue(aNormalCamera).asFloatVector();
+    MFloatVector &cameraPosition = block.inputValue(aPointCamera).asFloatVector();
+
+    // use for raytracing api enhancement below
+    MFloatVector point = cameraPosition;
+    MFloatVector normal = surfaceNormal;
+
+    MFloatVector &surfaceColor = block.inputValue(diffuseBaseColor).asFloatVector();
+    float diffuseReflectivity = block.inputValue(diffuseBaseWeight).asFloat();
+
+    // User-defined Reflection Color Gain
+    float reflectGain = 0.5f;
+
+    // Phong shading attributes
+    float power = 20.f;
+    float spec = block.inputValue(specularWeight).asFloat();
+
+    float specularR, specularG, specularB;
+    float diffuseR, diffuseG, diffuseB;
+    diffuseR = diffuseG = diffuseB = specularR = specularG = specularB = 0.0;
+
+    // get light list
+    MArrayDataHandle lightData = block.inputArrayValue(aLightData);
+    int numLights = lightData.elementCount();
+
+    // iterate through light list and get ambient/diffuse values
+    for (int count = 1; count <= numLights; count++)
     {
-        MStatus status;
-        MFloatVector resultColor(0.0, 0.0, 0.0);
+        MDataHandle currentLight = lightData.inputValue();
+        MFloatVector &lightIntensity = currentLight.child(aLightIntensity).asFloatVector();
 
-        // Get Shading Params from input block
-        MFloatVector &surfaceNormal = block.inputValue(aNormalCamera, &status).asFloatVector();
-        CHECK_MSTATUS(status);
-        MFloatVector &surfaceColor = block.inputValue(diffuseBaseColor, &status).asFloatVector();
-        CHECK_MSTATUS(status);
-        float &surfaceColorWeight = block.inputValue(diffuseBaseWeight, &status).asFloat();
-        CHECK_MSTATUS(status);
+        // Find the blind data
+        void *&blindData = currentLight.child(aLightBlindData).asAddr();
 
-        resultColor = surfaceColor;
-
-        // Get light list
-        MArrayDataHandle lightData = block.inputArrayValue(aLightData, &status);
-        CHECK_MSTATUS(status);
-        int numLights = lightData.elementCount(&status);
-        CHECK_MSTATUS(status);
-
-        for (int count = 1; count <= numLights; count++)
+        // find ambient component
+        if (currentLight.child(aLightAmbient).asBool())
         {
-            MDataHandle currentLight = lightData.inputValue(&status);
-            CHECK_MSTATUS(status);
+            diffuseR += lightIntensity[0];
+            diffuseG += lightIntensity[1];
+            diffuseB += lightIntensity[2];
+        }
 
-            MFloatVector &lightIntensity = currentLight.child(aLightIntensity).asFloatVector();
+        MFloatVector &lightDirection = currentLight.child(aLightDirection).asFloatVector();
 
-            // Find ambient component
-            if (currentLight.child(aLightAmbient).asBool())
-            {
-                resultColor += lightIntensity;
-            }
-
-            // Find diffuse component
+        if (blindData == NULL)
+        {
+            // find diffuse and specular component
             if (currentLight.child(aLightDiffuse).asBool())
             {
-                MFloatVector &lightDirection = currentLight.child(aLightDirection).asFloatVector();
                 float cosln = lightDirection * surfaceNormal;
-
-                if (cosln > 0.0f)
+                ;
+                if (cosln > 0.0f) // calculate only if facing light
                 {
-                    resultColor += lightIntensity * cosln;
+                    diffuseR += lightIntensity[0] * (cosln * diffuseReflectivity);
+                    diffuseG += lightIntensity[1] * (cosln * diffuseReflectivity);
+                    diffuseB += lightIntensity[2] * (cosln * diffuseReflectivity);
+                }
+
+                CHECK_MSTATUS(cameraPosition.normalize());
+
+                if (cosln > 0.0f) // calculate only if facing light
+                {
+                    float RV = (((2 * surfaceNormal) * cosln) - lightDirection) * cameraPosition;
+                    if (RV > 0.0)
+                        RV = 0.0;
+                    if (RV < 0.0)
+                        RV = -RV;
+
+                    if (power < 0)
+                        power = -power;
+
+                    float s = spec * powf(RV, power);
+
+                    specularR += lightIntensity[0] * s;
+                    specularG += lightIntensity[1] * s;
+                    specularB += lightIntensity[2] * s;
                 }
             }
-
-            // Advance to the next light.
-            if (count < numLights)
+        }
+        else
+        {
+            float cosln = MRenderUtil::diffuseReflectance(blindData, lightDirection, point, surfaceNormal, true);
+            if (cosln > 0.0f) // calculate only if facing light
             {
-                status = lightData.next();
-                CHECK_MSTATUS(status);
+                diffuseR += lightIntensity[0] * (cosln * diffuseReflectivity);
+                diffuseG += lightIntensity[1] * (cosln * diffuseReflectivity);
+                diffuseB += lightIntensity[2] * (cosln * diffuseReflectivity);
+            }
+
+            CHECK_MSTATUS(cameraPosition.normalize());
+
+            if (currentLight.child(aLightSpecular).asBool())
+            {
+                MFloatVector specLightDirection = lightDirection;
+                MDataHandle directionH = block.inputValue(aRayDirection);
+                MFloatVector direction = directionH.asFloatVector();
+                float lightAttenuation = 1.0;
+
+                specLightDirection = MRenderUtil::maximumSpecularReflection(blindData,
+                                                                            lightDirection, point, surfaceNormal, direction);
+                lightAttenuation = MRenderUtil::lightAttenuation(blindData, point, surfaceNormal, false);
+
+                // Are we facing the light
+                if (specLightDirection * surfaceNormal > 0.0f)
+                {
+                    float power2 = 20.f;
+                    MFloatVector rv = 2 * surfaceNormal * (surfaceNormal * direction) - direction;
+                    float s = spec * powf(rv * specLightDirection, power2);
+
+                    specularR += lightIntensity[0] * s * lightAttenuation;
+                    specularG += lightIntensity[1] * s * lightAttenuation;
+                    specularB += lightIntensity[2] * s * lightAttenuation;
+                }
             }
         }
-
-        // Factor incident light with surface color
-        resultColor[0] = resultColor[0] * surfaceColor[0] * surfaceColorWeight;
-        resultColor[1] = resultColor[1] * surfaceColor[1] * surfaceColorWeight;
-        resultColor[2] = resultColor[2] * surfaceColor[2] * surfaceColorWeight;
-
-        // Set ouput color attribute
-        if (plug == aOutColorR || plug == aOutColorG || plug == aOutColorB || plug == aOutColor)
-        {
-            // Get the handle to the attribute
-            MDataHandle outColorHandle = block.outputValue(aOutColor, &status);
-            CHECK_MSTATUS(status);
-            MFloatVector &outColor = outColorHandle.asFloatVector();
-
-            outColor = resultColor;
-            outColorHandle.setClean();
-        }
+        if (!lightData.next())
+            break;
     }
-    else
+
+    float transWeight = block.inputValue(transmissionWeight).asFloat();
+    resultColor[0] = (diffuseR * surfaceColor[0]) + specularR;
+    resultColor[1] = (diffuseG * surfaceColor[1]) + specularG;
+    resultColor[2] = (diffuseB * surfaceColor[2]) + specularB;
+
+    // add the reflection color
+    if (reflectGain > 0.0)
     {
-        return (MS::kUnknownParameter); // We got an unexpected plug
+
+        MStatus status;
+
+        // required attributes for using raytracer
+        // origin, direction, sampler, depth, and object id.
+        //
+        MDataHandle originH = block.inputValue(aRayOrigin, &status);
+        MFloatVector origin = originH.asFloatVector();
+
+        MDataHandle directionH = block.inputValue(aRayDirection, &status);
+        MFloatVector direction = directionH.asFloatVector();
+
+        MDataHandle samplerH = block.inputValue(aRaySampler, &status);
+        void *&samplerPtr = samplerH.asAddr();
+
+        MDataHandle depthH = block.inputValue(aRayDepth, &status);
+        short depth = depthH.asShort();
+
+        MDataHandle objH = block.inputValue(aObjectId, &status);
+        void *&objId = objH.asAddr();
+
+        MFloatVector reflectColor;
+        MFloatVector reflectTransparency;
+
+        MFloatVector &triangleNormal = block.inputValue(aTriangleNormalCamera).asFloatVector();
+
+        // compute reflected ray
+        MFloatVector l = -direction;
+        float dot = l * normal;
+        if (dot < 0.0)
+            dot = -dot;
+        MFloatVector refVector = 2 * normal * dot - l; // reflection ray
+        float dotRef = refVector * triangleNormal;
+        if (dotRef < 0.0)
+        {
+            const float s = 0.01f;
+            MFloatVector mVec = refVector - dotRef * triangleNormal;
+            mVec.normalize();
+            refVector = mVec + s * triangleNormal;
+        }
+        CHECK_MSTATUS(refVector.normalize());
+
+        status = MRenderUtil::raytrace(
+            point,        //  origin
+            refVector,    //  direction
+            objId,        //  object id
+            samplerPtr,   //  sampler info
+            depth,        //  ray depth
+            reflectColor, // output color and transp
+            reflectTransparency);
+
+        // add in the reflection color
+        resultColor[0] += reflectGain * (reflectColor[0]);
+        resultColor[1] += reflectGain * (reflectColor[1]);
+        resultColor[2] += reflectGain * (reflectColor[2]);
     }
 
-    return (MS::kSuccess);
+    // set ouput color attribute
+    MDataHandle outColorHandle = block.outputValue(aOutColor);
+    MFloatVector &outColor = outColorHandle.asFloatVector();
+    outColor = resultColor;
+    outColorHandle.setClean();
+
+    return MS::kSuccess;
 }
