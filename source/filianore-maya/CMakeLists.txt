@@ -58,6 +58,7 @@ set(SOURCE_FILES
   src/filianoremaya/flplasticshader.cpp
   src/filianoremaya/flstandardsurfaceshaderoverride.cpp
   src/filianoremaya/flstandardsurfaceshader.cpp
+  src/filianoremaya/materialprocessorutil.cpp
   src/filianoremaya/materialprocessor.cpp
   src/filianoremaya/finalrendercommand.cpp
   src/filianoremaya/pluginmain.cpp

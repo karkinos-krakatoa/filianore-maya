@@ -7,8 +7,6 @@
 
 using namespace filianore;
 
-std::shared_ptr<Texture<PrincipalSpectrum>> GetColorNode(MPlug &mShaderObjectPlug);
-
 std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh);
 
 #endif

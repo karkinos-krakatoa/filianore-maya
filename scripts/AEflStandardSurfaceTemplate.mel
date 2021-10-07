@@ -76,6 +76,10 @@ global proc AEflStandardSurfaceTemplate(string $nodeName)
 		editorTemplate -label "IOR" -addControl "thinFilmIOR";
 	editorTemplate -endLayout;
 
+	editorTemplate -beginLayout "Geometry" -collapse 1;
+		editorTemplate -label "Bump Map" -addControl "normalCamera";
+	editorTemplate -endLayout;
+
 	// include/call base class/node attributes
 	AEdependNodeTemplate $nodeName;
 	

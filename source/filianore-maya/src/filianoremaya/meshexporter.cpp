@@ -38,6 +38,9 @@ MayaMesh::MayaMesh(MFnMesh &_mesh, MObject &mObject)
 
     MItMeshPolygon faceIt(mDag);
 
+    MFloatVectorArray normals;
+    _mesh.getNormals(normals, MSpace::kWorld);
+
     MFloatArray uArray, vArray;
     _mesh.getUVs(uArray, vArray);
 
@@ -51,6 +54,7 @@ MayaMesh::MayaMesh(MFnMesh &_mesh, MObject &mObject)
     MPointArray triPoints;
     MIntArray triVtxIds;
     MIntArray faceVtxIds;
+    MIntArray faceNormalIds;
 
     for (faceIt.reset(); !faceIt.isDone(); faceIt.next())
     {
@@ -60,8 +64,10 @@ MayaMesh::MayaMesh(MFnMesh &_mesh, MObject &mObject)
         faceIt.getVertices(faceVtxIds);
 
         MIntArray faceUVIndices;
+        faceNormalIds.clear();
         for (uint vtxId = 0; vtxId < faceVtxIds.length(); vtxId++)
         {
+            faceNormalIds.append(faceIt.normalIndex(vtxId));
             int uvIndex;
             if (numUvs == 0)
             {
@@ -77,7 +83,7 @@ MayaMesh::MayaMesh(MFnMesh &_mesh, MObject &mObject)
         for (int triId = 0; triId < numTris; triId++)
         {
             int faceRelIds[3];
-            faceIt.getTriangle(triId, triPoints, triVtxIds);
+            faceIt.getTriangle(triId, triPoints, triVtxIds, MSpace::kWorld);
 
             for (uint triVtxId = 0; triVtxId < 3; triVtxId++)
             {
@@ -90,20 +96,34 @@ MayaMesh::MayaMesh(MFnMesh &_mesh, MObject &mObject)
                 }
             }
 
-            uint uvId0 = faceUVIndices[faceRelIds[0]];
-            uint uvId1 = faceUVIndices[faceRelIds[1]];
-            uint uvId2 = faceUVIndices[faceRelIds[2]];
+            // UVs
+            uint uvId1 = faceUVIndices[faceRelIds[0]];
+            StaticArray<float, 2> uv1 = StaticArray<float, 2>(uArray[uvId1], vArray[uvId1]);
+            uint uvId2 = faceUVIndices[faceRelIds[1]];
+            StaticArray<float, 2> uv2 = StaticArray<float, 2>(uArray[uvId2], vArray[uvId2]);
+            uint uvId3 = faceUVIndices[faceRelIds[2]];
+            StaticArray<float, 2> uv3 = StaticArray<float, 2>(uArray[uvId3], vArray[uvId3]);
 
-            MPoint p1 = triPoints[0] * mMatrix;
+            // Vertices
+            MPoint p1 = triPoints[0];
             StaticArray<float, 3> vtx1 = StaticArray<float, 3>((float)p1.x, (float)p1.y, (float)p1.z);
-            MPoint p2 = triPoints[1] * mMatrix;
+            MPoint p2 = triPoints[1];
             StaticArray<float, 3> vtx2 = StaticArray<float, 3>((float)p2.x, (float)p2.y, (float)p2.z);
-            MPoint p3 = triPoints[2] * mMatrix;
+            MPoint p3 = triPoints[2];
             StaticArray<float, 3> vtx3 = StaticArray<float, 3>((float)p3.x, (float)p3.y, (float)p3.z);
 
-            TriEntity t1(vtx1, StaticArray<float, 3>(), false, StaticArray<float, 2>(uArray[uvId0], vArray[uvId0]));
-            TriEntity t2(vtx2, StaticArray<float, 3>(), false, StaticArray<float, 2>(uArray[uvId1], vArray[uvId1]));
-            TriEntity t3(vtx3, StaticArray<float, 3>(), false, StaticArray<float, 2>(uArray[uvId2], vArray[uvId2]));
+            // Normals
+            MFloatVector nn1 = normals[faceNormalIds[faceRelIds[0]]];
+            StaticArray<float, 3> n1 = StaticArray<float, 3>((float)nn1.x, (float)nn1.y, (float)nn1.z);
+            MFloatVector nn2 = normals[faceNormalIds[faceRelIds[1]]];
+            StaticArray<float, 3> n2 = StaticArray<float, 3>((float)nn2.x, (float)nn2.y, (float)nn2.z);
+            MFloatVector nn3 = normals[faceNormalIds[faceRelIds[2]]];
+            StaticArray<float, 3> n3 = StaticArray<float, 3>((float)nn3.x, (float)nn3.y, (float)nn3.z);
+
+            // Process for Filianore
+            TriEntity t1(vtx1, n1, true, StaticArray<float, 3>(), false, uv1);
+            TriEntity t2(vtx2, n2, true, StaticArray<float, 3>(), false, uv2);
+            TriEntity t3(vtx3, n3, true, StaticArray<float, 3>(), false, uv3);
 
             std::shared_ptr<Shape> triangle = std::make_shared<Triangle>(t1, t2, t3);
             std::shared_ptr<Primitive> prim = std::make_shared<GeometricPrimitive>(triangle, material, nullptr);
