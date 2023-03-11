@@ -134,7 +134,7 @@ std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh)
                 mTransmissionWeight, transmissionColorTex,
                 mClearcoatWeight, clearcoatColorTex, mClearcoatIOR, mClearcoatGloss,
                 mThinFilmThickness, mThinFilmIOR,
-                bumpMap);
+                false, bumpMap);
 
         return standardSurfaceMaterial;
     }

@@ -18,7 +18,6 @@
 #include "filianore/bvhx/raytraverser.h"
 #include "filianore/bvhx/primitiveintersectors.h"
 
-#include "filianore/color/rgb.h"
 #include "filianore/core/interaction.h"
 #include "filianore/core/scene.h"
 #include "filianore/samplers/whitenoise.h"

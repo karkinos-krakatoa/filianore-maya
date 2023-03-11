@@ -24,15 +24,6 @@ set (CMAKE_MODULE_PATH
 # Find external Pkgs
 #---------------------------------------------------------------------------
 
-if (NOT MSVC)
-    find_package(OpenMP REQUIRED)
-    if (OpenMP_CXX_FOUND)
-        message(STATUS "OpenMP found")      
-    endif ()
-else ()
-    message(STATUS "OpenMP is disabled because MSVC only supports OpenMP 2.0.")
-endif ()
-
 find_package (filianore REQUIRED)
 if(filianore_FOUND)
   message("Filianore Foundation Lib found.")
@@ -76,4 +67,3 @@ set(CMAKE_CXX_STANDARD 17)
 build_plugin()
 
 target_link_libraries (filianoremaya filianore)
-target_link_libraries (filianoremaya OpenMP::OpenMP_CXX)

@@ -39,5 +39,6 @@
 /icons/*
 /presets/*
 /scripts/*.pyc
+/scripts/__pycache__/*
 /source/filianore-maya/build/*
 /source/filianore-maya/.vscode/*
