@@ -5,8 +5,6 @@
 
 #include "filianore/core/elemental.h"
 
-using namespace filianore;
-
-std::shared_ptr<Material> ProcessMeshMaterials(MFnMesh &mMesh);
+std::shared_ptr<filianore::Material> ProcessMeshMaterials(MFnMesh &mMesh);
 
 #endif

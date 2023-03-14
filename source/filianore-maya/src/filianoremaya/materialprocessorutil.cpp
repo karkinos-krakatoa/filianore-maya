@@ -1,46 +1,42 @@
 #include "materialprocessorutil.h"
 
-#include <maya/MObjectArray.h>
-#include <maya/MIntArray.h>
+#include <maya/MDataHandle.h>
 #include <maya/MFloatVector.h>
 #include <maya/MFnDependencyNode.h>
+#include <maya/MIntArray.h>
 #include <maya/MItDependencyGraph.h>
+#include <maya/MObjectArray.h>
 #include <maya/MPlugArray.h>
-#include <maya/MDataHandle.h>
 
 #include "util.h"
 
 #include "filianore/textures/constant.h"
 #include "filianore/textures/imagemap.h"
 
-#include "filianore/color/spectrumoperations.h"
 #include "filianore/color/spectruminits.h"
+#include "filianore/color/spectrumoperations.h"
 
-std::shared_ptr<Texture<PrincipalSpectrum>> EvaluateColorFromPlugNetwork(MPlug &mShaderObjectPlug)
-{
+std::shared_ptr<filianore::Texture<filianore::PrincipalSpectrum>> EvaluateColorFromPlugNetwork(MPlug &mShaderObjectPlug) {
     MStatus status;
 
-    // Default Debug Texture
-    PrincipalSpectrum defaultColor = FromReflectanceRGB(StaticArray<float, 3>(0.f, 1.f, 1.f));
-    auto defaultTexture = std::make_shared<ConstantTexture<PrincipalSpectrum>>(defaultColor);
+    // Default Debug filianore::Texture
+    filianore::PrincipalSpectrum defaultColor = filianore::from_reflectance_rgb(filianore::Vector3f(0.f, 1.f, 1.f));
+    auto defaultTexture = std::make_shared<filianore::ConstantTexture<filianore::PrincipalSpectrum>>(defaultColor);
 
     MPlugArray connectedPlugs;
     mShaderObjectPlug.connectedTo(connectedPlugs, true, false);
-    if (connectedPlugs.length() > 0)
-    {
+    if (connectedPlugs.length() > 0) {
         MFnDependencyNode fnDN(connectedPlugs[0].node());
 
         MItDependencyGraph dgIt(mShaderObjectPlug, MFn::kFileTexture, MItDependencyGraph::kUpstream,
                                 MItDependencyGraph::kBreadthFirst, MItDependencyGraph::kNodeLevel, &status);
-        if (status == MS::kFailure)
-        {
+        if (status == MS::kFailure) {
             FILIANORE_MAYA_LOG_INFO("Can't load graph textures");
             return defaultTexture;
         }
 
         dgIt.disablePruningOnFilter();
-        if (dgIt.isDone())
-        {
+        if (dgIt.isDone()) {
             return defaultTexture;
         }
 
@@ -49,32 +45,27 @@ std::shared_ptr<Texture<PrincipalSpectrum>> EvaluateColorFromPlugNetwork(MPlug &
         MString textureName; // name texture + path
         filenamePlug.getValue(textureName);
 
-        return std::make_shared<ImageMapTexture>(textureName.asChar());
-    }
-    else
-    {
+        return std::make_shared<filianore::ImageMapTexture>(textureName.asChar());
+    } else {
         // Default Color Node
         MFloatVector mShaderColor = mShaderObjectPlug.asMDataHandle().asFloatVector();
-        PrincipalSpectrum shaderColor = FromReflectanceRGB(StaticArray<float, 3>(mShaderColor.x, mShaderColor.y, mShaderColor.z));
-        return std::make_shared<ConstantTexture<PrincipalSpectrum>>(shaderColor);
+        filianore::PrincipalSpectrum shaderColor = filianore::from_reflectance_rgb(filianore::Vector3f(mShaderColor.x, mShaderColor.y, mShaderColor.z));
+        return std::make_shared<filianore::ConstantTexture<filianore::PrincipalSpectrum>>(shaderColor);
     }
 
     return defaultTexture;
 }
 
-std::shared_ptr<Texture<float>> EvaluateBumpShadingNetwork(MObject &mShaderObject)
-{
+std::shared_ptr<filianore::Texture<float>> EvaluateBumpShadingNetwork(MObject &mShaderObject) {
     MStatus status;
 
     MFnDependencyNode fn(mShaderObject);
 
     MPlug bumpPlug = fn.findPlug("normalCamera", true, &status);
-    if (status == MS::kSuccess)
-    {
+    if (status == MS::kSuccess) {
         MPlugArray connections;
         bumpPlug.connectedTo(connections, true, false);
-        if (connections.length() > 0)
-        {
+        if (connections.length() > 0) {
             MFnDependencyNode fnBump(connections[0].node());
 
             float bumpDepth;
@@ -87,10 +78,8 @@ std::shared_ptr<Texture<float>> EvaluateBumpShadingNetwork(MObject &mShaderObjec
             MPlug bumpValuePlug = fnBump.findPlug("bumpValue", true, &status);
             MPlugArray bumpValueConnections;
             bumpValuePlug.connectedTo(bumpValueConnections, true, false);
-            for (unsigned int j = 0; j < bumpValueConnections.length(); ++j)
-            {
-                if (bumpValueConnections[j].node().apiType() == MFn::kFileTexture)
-                {
+            for (unsigned int j = 0; j < bumpValueConnections.length(); ++j) {
+                if (bumpValueConnections[j].node().apiType() == MFn::kFileTexture) {
                     // We have the texture we need
                     MFnDependencyNode fnTex(bumpValueConnections[j].node());
 

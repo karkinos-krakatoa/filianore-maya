@@ -6,22 +6,17 @@
 
 #include "filianore/core/elemental.h"
 
-using namespace filianore;
-
-struct IlluminantExporterResponse
-{
+struct IlluminantExporterResponse {
     std::vector<std::shared_ptr<filianore::Illuminant>> illuminants;
-    std::vector<std::shared_ptr<Primitive>> prims;
+    std::vector<std::shared_ptr<filianore::Primitive>> prims;
 };
 
-class IlluminantExporter
-{
+class IlluminantExporter {
 public:
-    IlluminantExporter()
-    {
+    IlluminantExporter() {
     }
 
-    IlluminantExporterResponse ExportIlluminants(const std::vector<std::shared_ptr<Primitive>> &prims);
+    IlluminantExporterResponse ExportIlluminants(const std::vector<std::shared_ptr<filianore::Primitive>> &prims);
 };
 
 #endif

@@ -6,10 +6,8 @@
 
 #include "filianore/core/elemental.h"
 
-using namespace filianore;
+std::shared_ptr<filianore::Texture<filianore::PrincipalSpectrum>> EvaluateColorFromPlugNetwork(MPlug &mShaderObjectPlug);
 
-std::shared_ptr<Texture<PrincipalSpectrum>> EvaluateColorFromPlugNetwork(MPlug &mShaderObjectPlug);
-
-std::shared_ptr<Texture<float>> EvaluateBumpShadingNetwork(MObject &mShaderObject);
+std::shared_ptr<filianore::Texture<float>> EvaluateBumpShadingNetwork(MObject &mShaderObject);
 
 #endif

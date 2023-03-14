@@ -2,8 +2,8 @@
 
 #include <maya/MDGModifier.h>
 #include <maya/MFnDependencyNode.h>
-#include <maya/MFnNumericAttribute.h>
 #include <maya/MFnEnumAttribute.h>
+#include <maya/MFnNumericAttribute.h>
 #include <maya/MPlug.h>
 #include <maya/MPlugArray.h>
 #include <maya/MSelectionList.h>
@@ -13,20 +13,18 @@
 const MString RenderGlobalsNode::name("filianoreRendererGlobalsNode");
 const MTypeId RenderGlobalsNode::id(0x00132b41);
 
-RenderParams RenderGlobalsNode::context;
+filianore::RenderParams RenderGlobalsNode::context;
 
 MObject RenderGlobalsNode::samples;
 MObject RenderGlobalsNode::diffuseRayDepth;
 MObject RenderGlobalsNode::reflectionRayDepth;
 MObject RenderGlobalsNode::transmissionRayDepth;
 
-void *RenderGlobalsNode::creator()
-{
+void *RenderGlobalsNode::creator() {
     return (new RenderGlobalsNode);
 }
 
-MStatus RenderGlobalsNode::initialize()
-{
+MStatus RenderGlobalsNode::initialize() {
     MStatus status;
     MFnNumericAttribute numAttr;
     MFnEnumAttribute enumAttrFn;
@@ -58,17 +56,14 @@ MStatus RenderGlobalsNode::initialize()
     return (MS::kSuccess);
 }
 
-MStatus RenderGlobalsNode::compute(const MPlug &plug, MDataBlock &data)
-{
+MStatus RenderGlobalsNode::compute(const MPlug &plug, MDataBlock &data) {
     return (MS::kSuccess);
 }
 
-const RenderParams &RenderGlobalsNode::fetchContext()
-{
+const filianore::RenderParams &RenderGlobalsNode::fetchContext() {
     MStatus status;
     MObject mObj;
-    if (GetDependencyNodeByName(RenderGlobalsNode::name, mObj) != MS::kSuccess)
-    {
+    if (GetDependencyNodeByName(RenderGlobalsNode::name, mObj) != MS::kSuccess) {
         return (context);
     }
 
@@ -91,13 +86,11 @@ const RenderParams &RenderGlobalsNode::fetchContext()
     return (context);
 }
 
-const RenderParams &RenderGlobalsNode::getContext()
-{
+const filianore::RenderParams &RenderGlobalsNode::getContext() {
     return (context);
 }
 
-void RenderGlobalsNode::clean()
-{
+void RenderGlobalsNode::clean() {
     MObject mObj;
     GetDependencyNodeByName(RenderGlobalsNode::name, mObj);
 
