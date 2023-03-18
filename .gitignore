@@ -40,5 +40,6 @@
 /presets/*
 /scripts/*.pyc
 /scripts/__pycache__/*
-/source/filianore-maya/build/*
+/source/external/*
+/source/build/*
 /source/filianore-maya/.vscode/*

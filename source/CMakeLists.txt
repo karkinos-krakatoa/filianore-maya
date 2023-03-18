@@ -2,7 +2,13 @@
 # Cmake config
 #---------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.14...3.25)
+
+project(filianoremaya
+    DESCRIPTION "Maya plugin for Filianore")
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 #---------------------------------------------------------------------------
@@ -13,25 +19,20 @@ if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     message (FATAL_ERROR "In-source builds are not permitted; run CMake inside an empty build directory.")
 endif ()
 
-project(filianoremaya)
-
-set (CMAKE_MODULE_PATH
-  ${CMAKE_MODULE_PATH}
-  ${PROJECT_SOURCE_DIR}/cmake/modules)
-
 
 #---------------------------------------------------------------------------
-# Find external Pkgs
+# Include Maya Devkit
 #---------------------------------------------------------------------------
-
-find_package (filianore REQUIRED)
-if(filianore_FOUND)
-  message("Filianore Foundation Lib found.")
-else()
-  message(FATAL_ERROR "Filianore Foundation Lib not found.")
-endif()
 
 include($ENV{DEVKIT_LOCATION}/cmake/pluginEntry.cmake)
+
+
+#---------------------------------------------------------------------------
+# Include Filianore-Core by default
+#---------------------------------------------------------------------------
+
+add_subdirectory(external/filianore)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/filianore/src)
 
 
 #---------------------------------------------------------------------------
@@ -61,8 +62,6 @@ set(LIBRARIES
      OpenMaya
      Foundation
      TBB)
-
-set(CMAKE_CXX_STANDARD 17)
 
 build_plugin()
 
