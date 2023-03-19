@@ -1,0 +1,3 @@
+[submodule "source/external/filianore"]
+	path = source/external/filianore
+	url = https://github.com/karkinos-krakatoa/filianore.git
