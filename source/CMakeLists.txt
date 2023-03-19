@@ -32,7 +32,6 @@ include($ENV{DEVKIT_LOCATION}/cmake/pluginEntry.cmake)
 #---------------------------------------------------------------------------
 
 add_subdirectory(external/filianore)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/filianore/src)
 
 
 #---------------------------------------------------------------------------
