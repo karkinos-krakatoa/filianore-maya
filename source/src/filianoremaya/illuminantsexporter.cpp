@@ -27,8 +27,8 @@
 #include "filianore/creators/shapecreator.h"
 #include "filianore/shapes/triangle.h"
 
-#include "filianore/materials/lambert.h"
-#include "filianore/textures/constant.h"
+#include "filianore/shading/materials/lambert.h"
+#include "filianore/shading/textures/constant.h"
 
 #include "filianore/color/spectruminits.h"
 #include "filianore/color/spectrumoperations.h"

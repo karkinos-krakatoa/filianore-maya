@@ -13,11 +13,11 @@
 #include "flplasticshader.h"
 #include "flstandardsurfaceshader.h"
 
-#include "filianore/textures/constant.h"
-#include "filianore/textures/imagemap.h"
+#include "filianore/shading/textures/constant.h"
+#include "filianore/shading/textures/imagemap.h"
 
-#include "filianore/materials/lambert.h"
-#include "filianore/materials/standardsurface.h"
+#include "filianore/shading/materials/lambert.h"
+#include "filianore/shading/materials/standardsurface.h"
 
 #include "filianore/color/spectruminits.h"
 #include "filianore/color/spectrumoperations.h"

@@ -65,3 +65,11 @@ set(LIBRARIES
 build_plugin()
 
 target_link_libraries (filianoremaya filianore)
+
+
+# Specify the source file and destination directory
+# set(SOURCE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/build/filianoremaya.bundle")
+# set(DEST_DIR "${CMAKE_CURRENT_BINARY_DIR}/path/to/destination")
+
+# Copy and replace the file
+# file(COPY ${SOURCE_FILE} DESTINATION ${DEST_DIR})

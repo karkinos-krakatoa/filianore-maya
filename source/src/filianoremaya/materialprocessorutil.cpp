@@ -10,8 +10,8 @@
 
 #include "util.h"
 
-#include "filianore/textures/constant.h"
-#include "filianore/textures/imagemap.h"
+#include "filianore/shading/textures/constant.h"
+#include "filianore/shading/textures/imagemap.h"
 
 #include "filianore/color/spectruminits.h"
 #include "filianore/color/spectrumoperations.h"

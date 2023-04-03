@@ -11,12 +11,12 @@
 #include <tbb/parallel_for.h>
 #include <tbb/task_scheduler_init.h>
 
-#include "filianore/accel/bvh.h"
+#include "filianore/bvh/flbvh.h"
 
 #include "filianore/core/interaction.h"
 #include "filianore/core/scene.h"
 #include "filianore/integrators/pathintegrator.h"
-#include "filianore/samplers/whitenoise.h"
+#include "filianore/sampling/samplers/whitenoise.h"
 
 #include "filianore/color/spectruminits.h"
 #include "filianore/color/spectrumoperations.h"

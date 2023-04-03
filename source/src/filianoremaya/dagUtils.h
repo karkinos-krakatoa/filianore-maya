@@ -2,7 +2,7 @@
 #define _MAYA_DAG_UTILS_H
 
 #include "filianore/core/elemental.h"
-#include "filianore/maths/vec.h"
+#include "filianore/maths/geometry.h"
 #include <maya/MDagPath.h>
 
 struct TransformVectors {
