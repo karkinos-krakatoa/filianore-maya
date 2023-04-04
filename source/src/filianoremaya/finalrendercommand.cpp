@@ -15,6 +15,7 @@
 
 #include "filianore/core/interaction.h"
 #include "filianore/core/scene.h"
+#include "filianore/integrators/normalintegrator.h"
 #include "filianore/integrators/pathintegrator.h"
 #include "filianore/sampling/samplers/whitenoise.h"
 
@@ -115,7 +116,7 @@ MStatus FinalRenderCommand::doIt(const MArgList &args) {
     // Render components setup
     filianore::Scene scene(bvh, illums);
     std::shared_ptr<filianore::Sampler> sampler = std::make_shared<filianore::Whitenoise>();
-    std::unique_ptr<filianore::Integrator> integrator = std::make_unique<filianore::PathIntegrator>(renderParams);
+    std::unique_ptr<filianore::Integrator> integrator = std::make_unique<filianore::NormalIntegrator>(renderParams);
     integrator->prepare_the_renderer(scene, *sampler);
 
     // Main Render Loop
